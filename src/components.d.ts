@@ -4,6 +4,13 @@
  * and imports for stencil collections that might be configured in your stencil.config.js file
  */
 
+import {
+  RouterHistory,
+} from '@stencil/router';
+import {
+  PokeCheck,
+  PokeService,
+} from './utils/interfaces';
 
 declare global {
   interface HTMLStencilElement extends HTMLElement {
@@ -38,7 +45,7 @@ declare global {
   }
   namespace JSXElements {
     export interface PokeSignInAttributes extends HTMLAttributes {
-      
+      history?: RouterHistory;
     }
   }
 }
@@ -69,6 +76,97 @@ declare global {
   namespace JSXElements {
     export interface PokeUiAttributes extends HTMLAttributes {
       baseUrl?: string;
+    }
+  }
+}
+
+
+import {
+  PokeUptimeCheck as PokeUptimeCheck
+} from './components/poke-uptime-check/poke-uptime-check';
+
+declare global {
+  interface HTMLPokeUptimeCheckElement extends PokeUptimeCheck, HTMLStencilElement {
+  }
+  var HTMLPokeUptimeCheckElement: {
+    prototype: HTMLPokeUptimeCheckElement;
+    new (): HTMLPokeUptimeCheckElement;
+  };
+  interface HTMLElementTagNameMap {
+    "poke-uptime-check": HTMLPokeUptimeCheckElement;
+  }
+  interface ElementTagNameMap {
+    "poke-uptime-check": HTMLPokeUptimeCheckElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "poke-uptime-check": JSXElements.PokeUptimeCheckAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface PokeUptimeCheckAttributes extends HTMLAttributes {
+      check?: PokeCheck;
+      domain?: string;
+    }
+  }
+}
+
+
+import {
+  PokeUptimeService as PokeUptimeService
+} from './components/poke-uptime-service/poke-uptime-service';
+
+declare global {
+  interface HTMLPokeUptimeServiceElement extends PokeUptimeService, HTMLStencilElement {
+  }
+  var HTMLPokeUptimeServiceElement: {
+    prototype: HTMLPokeUptimeServiceElement;
+    new (): HTMLPokeUptimeServiceElement;
+  };
+  interface HTMLElementTagNameMap {
+    "poke-uptime-service": HTMLPokeUptimeServiceElement;
+  }
+  interface ElementTagNameMap {
+    "poke-uptime-service": HTMLPokeUptimeServiceElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "poke-uptime-service": JSXElements.PokeUptimeServiceAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface PokeUptimeServiceAttributes extends HTMLAttributes {
+      service?: PokeService;
+    }
+  }
+}
+
+
+import {
+  PokeUptime as PokeUptime
+} from './components/poke-uptime/poke.uptime';
+
+declare global {
+  interface HTMLPokeUptimeElement extends PokeUptime, HTMLStencilElement {
+  }
+  var HTMLPokeUptimeElement: {
+    prototype: HTMLPokeUptimeElement;
+    new (): HTMLPokeUptimeElement;
+  };
+  interface HTMLElementTagNameMap {
+    "poke-uptime": HTMLPokeUptimeElement;
+  }
+  interface ElementTagNameMap {
+    "poke-uptime": HTMLPokeUptimeElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "poke-uptime": JSXElements.PokeUptimeAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface PokeUptimeAttributes extends HTMLAttributes {
+      history?: RouterHistory;
     }
   }
 }

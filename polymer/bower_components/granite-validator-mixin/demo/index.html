@@ -1,0 +1,109 @@
+<!--
+@license MIT
+Copyright (c) 2017 Horacio "LostInBrittany" Gonzalez
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+  <title>granite-validator demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../paper-styles/color.html">
+  <link rel="import" href="../../paper-input/paper-input.html">
+  <link rel="import" href="cats-only.html">
+
+
+  <custom-style>
+    <style is="custom-style" include="demo-pages-shared-styles">
+    </style>
+  </custom-style>
+</head>
+
+<body>
+  <div class="vertical-section-container centered">
+    <h3>Basic granite-validator demo</h3>
+    <p>
+      The
+      <code>cats-only</code> validator only accepts the string "cats" and its suffixes ("c", "ca", "cat").
+    </p>
+    <demo-snippet>
+      <template>
+        <custom-style>
+          <style is="custom-style">
+            #simpleInput[invalid] {
+              color: var(--google-red-500);
+              border: 2px solid var(--google-red-500);
+            }
+
+            #simpleInput:not([invalid]) {
+              color: var(--google-green-500);
+              border: 2px solid var(--google-green-500);
+            }
+          </style>
+        </custom-style>
+        <cats-only id="simpleCats"></cats-only>
+        <input id="simpleInput">
+        <script>
+          /* globals simpleInput, simpleCats */
+          simpleInput.addEventListener('input', _onSimpleInput.bind(simpleInput));
+          function _onSimpleInput() {
+            console.log('_onSimpleInput', simpleInput.value);
+            var valid = simpleCats.validate(simpleInput.value);
+            if (valid) {
+              simpleInput.removeAttribute('invalid');
+            }
+            else {
+              simpleInput.setAttribute('invalid', true);
+            }
+          }
+        </script>
+      </template>
+    </demo-snippet>
+  </div>
+
+
+  <div class="vertical-section-container centered">
+      <h3>Basic granite-validator demo</h3>
+      <p>
+        The
+        <code>cats-only</code> validator only accepts the string "cats" and its suffixes ("c", "ca", "cat").
+      </p>
+      <demo-snippet>
+        <template>
+          <custom-style>
+            <style is="custom-style">
+              #simpleInput[invalid] {
+                color: var(--google-red-500);
+                border: 2px solid var(--google-red-500);
+              }
+  
+              #simpleInput:not([invalid]) {
+                color: var(--google-green-500);
+                border: 2px solid var(--google-green-500);
+              }
+            </style>
+          </custom-style>
+          <paper-input 
+              id="paperInput" 
+              auto-validate
+              validator="cats-only"></paper-input>
+          
+        </template>
+      </demo-snippet>
+    </div>
+</body>
+
+</html>

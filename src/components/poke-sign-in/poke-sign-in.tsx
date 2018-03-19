@@ -1,4 +1,6 @@
-import { Component, Method, State, Watch } from "@stencil/core";
+import { Component,  Event, EventEmitter, Method, Prop, State, Watch } from "@stencil/core";
+import { RouterHistory } from '@stencil/router';
+
 
 @Component({
   tag: "poke-sign-in",
@@ -6,11 +8,15 @@ import { Component, Method, State, Watch } from "@stencil/core";
 })
 export class PokeSignIn {
 
+  @Prop() history: RouterHistory;
+
   @State() email: string = '';
   @State() password: string = '';
   @State() loading: boolean = false;
   @State() signInDisabled: boolean = true;
 
+
+  @Event({eventName: 'sign-in-succesful'}) signInSuccesful: EventEmitter;
 
   @Method()
   queryServer(event?: UIEvent) {
@@ -30,18 +36,28 @@ export class PokeSignIn {
     this.loading = true;
     fetch(url, options).then( response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok.');
+        throw new Error(`Response: ${response.status} - ${response.statusText}`);
       }
       return response.json();
     }).then( (data) => {
-      console.log('Got response',data);
-      this.loading = false;
+      if (!data.token) {
+        throw new Error('No token found in response');
+      }
+      this.gotSignInSuccesful(data.token);
     }).catch( (error) => {
       console.error('[poke-sign-in] handleClick - There has been a problem with your fetch operation:',
           error.message);
       this.loading = false;
     });;
 
+  }
+
+  gotSignInSuccesful(token: string) {
+    console.log("[forge-search] gotSignInSuccesful, token", token);
+    this.loading = false;
+    window.localStorage.setItem('token', token);
+    this.signInSuccesful.emit();
+    this.history.push(`/uptime`, {});
   }
 
   handleEmailChange(event) {

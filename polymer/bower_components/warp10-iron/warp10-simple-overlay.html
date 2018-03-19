@@ -1,0 +1,44 @@
+<link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-overlay-behavior/iron-overlay-behavior.html">
+
+<dom-module id="warp10-simple-overlay">
+
+  <style>
+    :host {
+      background: white;
+      color: black;
+      padding: 24px;
+      box-shadow: rgba(0, 0, 0, 0.24) -2.3408942051048403px 5.524510324047423px 12.090680100755666px 0px, rgba(0, 0, 0, 0.12) 0px 0px 12px 0px;
+    }
+  </style>
+
+  <template>
+    <slot></slot>
+  </template>
+
+</dom-module>
+
+<script>
+  class Warp10SimpleOverlay extends Polymer.mixinBehaviors([Polymer.IronOverlayBehavior], Polymer.Element) {
+    static get is() { return 'warp10-simple-overlay'; }
+    static get properties() {
+      return {
+        debug: {
+          type: Boolean,
+          value: false,
+        },
+      };
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      if (this.debug) {
+        console.log('[warp10-simple-overlay] attached');
+      }
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(Warp10SimpleOverlay.is, Warp10SimpleOverlay);
+</script>

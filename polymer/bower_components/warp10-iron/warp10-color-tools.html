@@ -1,0 +1,221 @@
+<script>
+  (function() {
+    let warp10ColorTools = {};
+
+
+    /** 
+     * color palette
+     */
+    warp10ColorTools.palette = [
+      '#001f3f', // NAVY
+      '#0074D9', // BLUE
+      '#7FDBFF', // AQUA
+      '#39CCCC', // TEAL
+      '#3D9970', // OLIVE
+      '#2ECC40', // GREEN
+      '#01FF70', // LIME
+      '#FFDC00', // YELLOW
+      '#FF851B', // ORANGE
+      '#FF4136', // RED
+      '#85144b', // MAROON
+      '#F012BE', // FUSCHIA
+      '#B10DC9', // PURPLE
+      '#111111', // BLACK
+      '#AAAAAA', // GRAY
+      '#DDDDDD', // SILVER
+    ];
+
+    /** 
+     * Getting color from palette
+     * 
+     * @param {int} i The index
+     * @return {string} The color
+     */
+    warp10ColorTools.getColor = function(i) {
+      return warp10ColorTools.palette[i % warp10ColorTools.palette.length];
+    };
+
+
+    /** 
+     * Getting hex RGB representation from R,G & V int values
+     * 
+     * @param {int} r   The R component
+     * @param {int} g   The G component
+     * @param {int} b   The B component
+     * @return {string} The hex RGB representation
+     */
+    warp10ColorTools.rgb2hex = function(r, g, b) {
+      function componentToHex(c) {
+          let hex = c.toString(16);
+          return hex.length == 1 ? '0' + hex : hex;
+      }
+
+      return '#' + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    };
+
+    /** 
+     * Converts an HSV color value to RGB. Conversion formula
+     * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+     * Assumes h, s, and v are contained in the set [0, 1] and
+     * returns r, g, and b in the set [0, 255].
+    *
+     * @param   {int}  h       The hue
+     * @param   {int}  s       The saturation
+     * @param   {int}  v       The value
+     * @return  {array}        The RGB representation
+     */
+    warp10ColorTools.hsv2rgb = function(h, s, v) {
+          let r;
+          let g;
+          let b;
+
+          let i = Math.floor(h * 6);
+          let f = h * 6 - i;
+          let p = v * (1 - s);
+          let q = v * (1 - f * s);
+          let t = v * (1 - (1 - f) * s);
+
+          switch (i % 6) {
+              case 0: r = v, g = t, b = p; break;
+              case 1: r = q, g = v, b = p; break;
+              case 2: r = p, g = v, b = t; break;
+              case 3: r = p, g = q, b = v; break;
+              case 4: r = t, g = p, b = v; break;
+              case 5: r = v, g = p, b = q; break;
+          }
+
+          return [r * 255, g * 255, b * 255];
+    };
+
+
+    /** 
+     * Converts an RGB color value to HSV. Conversion formula
+     * adapted from http://en.wikipedia.org/wiki/HSV_color_space.
+     * Assumes r, g, and b are contained in the set [0, 255] and
+     * returns h, s, and v in the set [0, 1].
+     *
+     * @param {int} r   The R component
+     * @param {int} g   The G component
+     * @param {int} b   The B component
+     * @return {array}  The HSV representation
+     */
+    warp10ColorTools.rgb2hsv = function(r, g, b) {
+      // console.debug("[warp10-color-tools] rgb2hsv - RGB", [r,g,b]);
+      // Normalize
+      let normR = r/255.0;
+      let normG = g/255.0;
+      let normB = b/255.0;
+
+
+      let M = Math.max(normR, normG, normB);
+      let m = Math.min(normR, normG, normB);
+      let d = M - m;
+
+      let h;
+      let s;
+      let v;
+
+      v = M;
+      if (d==0) {
+        h = 0;
+        s = 0;
+      } else {
+        s = d/v;
+        switch (M) {
+          case normR:
+          h = ((normG - normB) + d*(normG < normB ? 6: 0)) / 6 * d;
+          break;
+          case normG:
+          h = ((normB - normR) + d*2) / 6 * d;
+          break;
+          case normB:
+          h = ((normR - normG) + d*4) / 6 * d;
+          break;
+        }
+      }
+
+      // console.debug("[warp10-color-tools] rgb2hsv - hsv", [h,s,v]);
+      return [h, s, v];
+    };
+
+    /**
+     * @typedef RgvColor
+     * @type {object}
+     * @param {int} r   The R component
+     * @param {int} g   The G component
+     * @param {int} b   The B component
+     */
+
+    /**
+     * @typedef HsvColor
+     * @type {object}
+     * @param {int} h   The H component
+     * @param {int} s   The S component
+     * @param {int} v   The V component
+     */
+  
+    /** 
+     * Calculate HSV gradient from RGB values
+     * @param {RgvColor} c1  Initial color (in RGB, { r: xx, g: xx, b: xx} r,g & b integer between 0 and 255)
+     * @param {RgvColor} c2  Final color (in RGB, { r: xx, g: xx, b: xx} r,g & b integer between 0 and 255)
+     * @param {int} steps    The number of steps in the gradient   
+     * @return {RgvColor[]}   The gradient
+     */
+    warp10ColorTools.hsvGradientFromRgbColors = function(c1, c2, steps) {
+      // console.debug("[warp10-color-tools] hsvGradientFromRgbColors", {c1: c1, c2: c2, steps: steps});
+      let c1hsv = warp10ColorTools.rgb2hsv(c1.r, c1.g, c1.b);
+      let c2hsv = warp10ColorTools.rgb2hsv(c2.r, c2.g, c2.b);
+
+      c1.h =c1hsv[0]; c1.s = c1hsv[1]; c1.v = c1hsv[2];
+      c2.h =c2hsv[0]; c2.s = c2hsv[1]; c2.v = c2hsv[2];
+
+      let gradient = warp10ColorTools.hsvGradient(c1, c2, steps);
+      for (let i in gradient) {
+        if (gradient[i]) {
+          gradient[i].rgb = warp10ColorTools.hsv2rgb(gradient[i].h, gradient[i].s, gradient[i].v);
+          gradient[i].r = Math.floor(gradient[i].rgb[0]);
+          gradient[i].g = Math.floor(gradient[i].rgb[1]);
+          gradient[i].b = Math.floor(gradient[i].rgb[2]);
+        }
+      }
+      console.debug('[warp10-color-tools] hsvGradientFromRgbColors', {c1: c1, c2: c2, steps: steps, gradient: gradient});
+      return gradient;
+    };
+
+    /** 
+     * Calculate HSV gradient
+     * @param {HsvColor} c1   Initial color (in HSV, { h: xx, s: xx, b: xx} h,s & b between 0 and 1)
+     * @param {HsvColor} c2   Final color (in HSV, { h: xx, s: xx, b: xx} h,s & b between 0 and 1)
+     * @param {int} steps     The number of steps   
+     * @return {HsvColor[]}   The gradient
+     */
+    warp10ColorTools.hsvGradient = function(c1, c2, steps) {
+      // console.debug("[warp10-color-tools] hsvGradient", {c1: c1, c2: c2, steps: steps});
+      let gradient = new Array(steps);
+
+      // determine clockwise and counter-clockwise distance between hues
+      let distCCW = (c1.h >= c2.h) ? c1.h - c2.h : 1 + c1.h - c2.h;
+      let distCW = (c1.h >= c2.h) ? 1 + c2.h - c1.h : c2.h - c1.h;
+
+      // make gradient for this part
+      for (let i = 0; i < steps; i ++) {
+        // interpolate h, s, b
+        let h = (distCW <= distCCW) ? c1.h + (distCW * i / (steps-1)) : c1.h - (distCCW * i / (steps-1));
+        if (h < 0) {
+          h = 1 + h;
+        }
+        if (h > 1) {
+          h = h - 1;
+        }
+        let s = (1 - i / (steps-1)) * c1.s + i / (steps-1) * c2.s;
+        let v = (1 - i / (steps-1)) * c1.v + i / (steps-1) * c2.v;
+        // add to gradient array
+        gradient[i] = {h: h, s: s, v: v};
+      }
+      return gradient;
+    };
+
+
+    window.warp10ColorTools = warp10ColorTools;
+  }).call();
+</script>

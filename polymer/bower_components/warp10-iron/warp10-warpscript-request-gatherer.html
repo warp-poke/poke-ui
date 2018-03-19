@@ -1,0 +1,184 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2017 Cityzen Data
+@license Apache 2.0
+-->
+<link rel="import" href=" ../polymer/polymer.html">
+
+<script>
+  (function() {
+    /*
+    // TypeScript definitions of the structures
+    interface subscribers {
+      [proxy: String]: warp10-warpscript-request-gatherer[]
+    }
+    interface proxifiedWarpscript {
+      [proxy: String]:  String
+    }
+    */
+    var subscribers = {};
+    var proxifiedWarpscript = {};
+
+    /**
+     * Concatenates all the Warpscript calls from all the attached instance sharing the same calling interval \
+     * in a coherent Warpscript script and then sends an event for the warpscript proxy
+     *
+     * @param {string} proxy The proxy name
+     */
+    function generateWarpscript(proxy) {
+      let warpscript = `
+        {} '__result' STORE
+        <% '__name' STORE DEPTH ->LIST '__stack' STORE $__result $__stack $__name PUT '__name' STORE %> 
+        '__stack2map' STORE
+      `;
+
+      let beginMacro = `
+        <%  
+          SAVE '__context' STORE
+      `;
+      let endMacro = `
+          $__context RESTORE
+        %>
+      `;
+      subscribers[proxy].forEach((s, i) =>{
+        let name = `${s.name}_${i}`;
+        warpscript += `${beginMacro} ${s.warpscript} ${endMacro} '${name}' STORE @${name} '${name}' @__stack2map `;
+      });
+      warpscript += '$__result';
+      // console.log('[warp10-warpscript-request-gatherer] generateWarpscript \n', warpscript);
+  
+      if (!proxifiedWarpscript[proxy]) {
+        proxifiedWarpscript[proxy] = {};
+      }
+      proxifiedWarpscript[proxy] = warpscript;
+      // console.log('[warp10-warpscript-request-gatherer] generateWarpscript', proxy, proxifiedWarpscript);
+
+      var event = new CustomEvent('request-gathered-for-' + proxy, {
+        detail: {
+          proxy: proxy,
+          warpscript: warpscript,
+        },
+      });
+      document.dispatchEvent(event);
+    }
+
+    /**
+     * Event listener function called when a response is receiver. It sends an response event to every
+     * attached instance sharing the interval
+     * @param {event} evt
+     */
+    function requestGathererResponse(evt) {
+      if (!evt.detail || !evt.detail.response || !evt.detail.response.stack || !evt.detail.response.stack[0]) {
+        return;
+      }
+      console.debug('[warp10-warpscript-request-gatherer] requestGathererResponse \n', {
+        proxy: evt.detail.name,
+        response: evt.detail.response,
+      });
+
+      subscribers[evt.detail.name].forEach((s, i) => {
+        let name = `${s.name}_${i}`;
+        let event = new CustomEvent('response', {
+          detail: evt.detail.response.stack[0][name],
+        });
+        // console.log('[warp10-warpscript-request-gatherer] requestGathererResponse', event.detail);
+        s.dispatchEvent(event);
+      });
+    }
+
+    // Event listener
+    document.addEventListener('warpscript-request-gatherer-response', requestGathererResponse);
+
+    Polymer({
+      is: 'warp10-warpscript-request-gatherer',
+
+      properties: {
+        /**
+         * The name  of the element using this instance de proxy
+         */
+        name: {
+          type: String,
+          value: '',
+        },
+        /**
+         * The warscript for the element using this instance de proxy
+         */
+        warpscript: {
+          type: String,
+          value: '',
+        },
+        /**
+         *  The name of the proxy used for this warpscript
+         */
+        proxy: {
+          type: String,
+          value: 'warpscript-http-proxy',
+          observer: 'proxyChanged',
+        },
+      },
+      observers: [
+        'paramsChanged(name, warpscript)',
+      ],
+
+      //* **********************************************************************
+      // Observers
+      //* **********************************************************************
+      proxyChanged: function(newProxy, oldProxy) {
+        if (!this.isAttached) {
+          return;
+        }
+        console.debug('[warp10-warpscript-request-gatherer] proxyChanged - new: ', newProxy, ', old: ' + oldProxy);
+        this.unregister(oldProxy);
+        this.register(newProxy);
+        generateWarpscript(newProxy);
+      },
+      paramsChanged: function() {
+        if (!this.isAttached) {
+          return;
+        }
+        console.debug('[warp10-warpscript-request-gatherer] paramsChanged \n', this.name);
+        generateWarpscript(this.proxy);
+      },
+
+      //* **********************************************************************
+      // Lifecycle methods
+      //* **********************************************************************
+      attached: function() {
+        console.debug('[warp10-warpscript-request-gatherer] attached \n', this.name);
+        this.register(this.proxy);
+        this.isAttached = true;
+        generateWarpscript(this.proxy);
+      },
+      detached: function() {
+        this.unregister(this.proxy);
+        this.isAttached = false;
+        console.debug('[warp10-warpscript-request-gatherer] dettached \n', this.name);
+      },
+
+      //* **********************************************************************
+      // Other methods
+      //* **********************************************************************
+      register: function(proxy) {
+        if (!subscribers[proxy]) {
+          subscribers[proxy] = [];
+        }
+        if (subscribers[proxy].indexOf(this) < 0) {
+          console.debug('[warp10-warpscript-request-gatherer] register - Registering instance', this);
+          subscribers[proxy].push(this);
+        } else {
+          console.warn('[warp10-warpscript-request-gatherer] register - Instance already registered', this);
+        }
+      },
+      unregister: function(proxy) {
+        if (!subscribers[proxy]) {
+          return;
+        }
+        var i = subscribers[proxy].indexOf(this);
+        if (i >= 0) {
+          console.debug('[warp10-warpscript-request-gatherer] unregister - Unregistering instance', this);
+          subscribers[proxy].splice(i, 1);
+        }
+      },
+    });
+  })();
+</script>

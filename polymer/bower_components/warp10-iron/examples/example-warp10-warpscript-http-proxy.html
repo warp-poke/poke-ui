@@ -1,0 +1,82 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2017 Cityzen Data
+@license Apache 2.0
+-->
+<!doctype html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>Example of &lt;warp10-warpscript-request-gatherer&gt;</title>
+
+  <style>
+
+  </style>
+
+  <script src=" ../../webcomponentsjs/webcomponents-lite.min.js"></script>
+
+  <link rel="import" href=" ../warp10-warpscript-request-gatherer.html">
+  <link rel="import" href=" ../warp10-warpscript-http-proxy.html">
+
+  <!--
+  <script>
+    document.addEventListener("warpscript-request-gatherer", function(evt) {
+      console.debug("on-warpscript-request-gatherer", evt.detail);
+    });
+  </script>
+-->
+
+<dom-module is="example-container">
+  <template>
+    <style>
+      .container {
+        border: solid 1px #444;
+        padding: 16px;
+        margin: 16px;
+        border-radius: 5px;
+      }
+    </style>
+    <warp10-warpscript-request-gatherer
+        name="[[name]]"
+        proxy="test-proxy"
+        warpscript="[[warpscript]]"
+        interval="[[interval]]"
+        on-response="_handleResponse"></warp10-warpscript-request-gatherer>
+    <div class="container">
+      [[result]]
+    </div>
+  </template>
+  <script>
+    Polymer({
+      is: "example-container",
+      properties: {
+        result: { 
+          type: String,
+          value: '',
+        }
+      },
+      _handleResponse: function(evt, response) {
+        console.debug("[example-container] _handleResponse - name", this.name, "response", response);
+        this.result = response[0];
+      }
+    });
+  </script>
+</dom-module>
+
+</head>
+
+<body>
+
+  <warp10-warpscript-http-proxy
+      name="test-proxy"
+      presets="'Testing presets' 'preset' STORE NOW NOW"
+      url="https://warp.cityzendata.net/api/v0/exec"
+      interval="5"></warp10-warpscript-http-proxy>
+
+  <example-container name="test01" warpscript="NOW 'now' STORE $now"></example-container>
+
+  <example-container name="test02" warpscript="$preset" ></example-container>
+
+  <example-container name="test03" warpscript="42 'now' CSTORE $now" ></example-container>
+</body>

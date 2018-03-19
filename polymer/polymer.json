@@ -1,0 +1,41 @@
+{
+  "entrypoint": "index.html",
+  "shell": "bundle.html",
+  "fragments": [
+  ],
+  "sources": [
+    "bower_components/font-roboto/fonts/**"
+  ],
+  "extraDependencies": [
+    "manifest.json",
+    "bower_components/webcomponentsjs/**"
+  ],
+  "builds": [
+    {
+      "name": "bundled",
+      "bundle": true,
+      "addServiceWorker": true,
+      "js": {
+        "minify": true
+      },
+      "css": {
+        "minify": true
+      },
+      "html": {
+        "minify": true
+      }
+    },
+    {
+      "name": "unbundled",
+      "js": {
+        "minify": true
+      },
+      "css": {
+        "minify": true
+      },
+      "html": {
+        "minify": true
+      }
+    }
+  ]
+}

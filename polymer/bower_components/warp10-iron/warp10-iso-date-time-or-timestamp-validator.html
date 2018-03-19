@@ -1,0 +1,41 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2017 Cityzen Data
+@license Apache 2.0
+-->
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../granite-validator-mixin/granite-validator-mixin.html">
+
+<script>
+  /* globals GraniteElements */
+  /* eslint new-cap: "off" */
+
+  // Extend Polymer.Element base class
+  class Warp10IsoDateTimeOrTimestampValidator extends GraniteElements.ValidatorMixin(Polymer.Element) {
+    static get is() {
+      return 'warp10-iso-date-time-or-timestamp-validator';
+    }
+  
+    static get properties() {
+      return {
+        debug: {
+          type: Boolean,
+          value: false,
+        },
+      };
+    }
+
+    validate(values) {
+      if (this.debug) {
+        console.log('[warp10-iso-date-time-or-timestamp-validator] validate called', values);
+      }
+      if (Date.parse(values) || String(~~Number(values)) === values) {
+        return true;
+      }
+      return false;
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(Warp10IsoDateTimeOrTimestampValidator.is, Warp10IsoDateTimeOrTimestampValidator);
+</script>
