@@ -1,0 +1,34 @@
+// Override spectre variables
+// see https://picturepan2.github.io/spectre/getting-started.html#importing
+$primary-color: #113f6d;
+$dark-color: #273b54;
+
+// Import full Spectre source code
+@import "node_modules/spectre.css/src/spectre";
+@import "node_modules/spectre.css/src/spectre-exp";
+@import "node_modules/spectre.css/src/spectre-icons";
+
+
+.container {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+main {
+  padding-top: 1rem;
+}
+
+.navbar {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5em;
+
+  h1 {
+    margin-bottom: 0;
+  }
+}
+
+.logo {
+  fill: #fff;
+  width: 12rem;
+  height: 3.5rem;
+}
