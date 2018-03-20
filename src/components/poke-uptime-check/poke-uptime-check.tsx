@@ -1,4 +1,4 @@
-import { Component, Element, Prop, State, Watch } from "@stencil/core";
+import { Component, Element, Prop } from "@stencil/core";
 
 import { PokeCheck } from '../../utils/interfaces';
 
@@ -13,75 +13,25 @@ export class PokeUptimeCheck {
 
   @Prop() domain: string;
   @Prop() check: PokeCheck;
-  @Prop() warp10Token: string;
 
-  @State() status: string;
-  @State() warpscript: string;
-
-  @State() url: string = `https://gra1-poke.metrics.ovh.net/api/v0/exec`;
-  @State() options: RequestInit;
-
-  @Watch('warp10Token')
-  getWarpscript() {
-    console.log('[poke-uptime-check] getWarpscript', this.warpscript);
-    this.warpscript = `
-      '${this.warp10Token}'  
-      'http.response.time' { 'service_id'  '${this.check.service_id}' }
-      NOW 6 h 
-      FETCH
-      '${this.warp10Token}'  
-      'http.response.status' { 'service_id'  '${this.check.service_id}' }
-      NOW -1 
-      FETCH
-    `;
-  }
+  @Prop() status: string | number | boolean;
 
 
-  @Watch('warpscript')  
-  prepareQuery() {
-    console.log('[poke-uptime-check] prepareQuery', this.warpscript);
-    this.options = {
-      headers: {},
-      mode: 'cors',
-      redirect: 'follow',  
-      method: 'POST',   
-      body: this.warpscript,
-    };   
-  }
-
-  queryServer() {
-    if (this.warpscript) {
-      fetch(this.url, this.options).then( response => {
-        if (!response.ok) {
-          throw new Error(`Response: ${response.status} - ${response.statusText}`);
-        }
-        return response.json();
-      }).then( (data) => {
-        console.log('[poke-uptime-check] queryServer - Got Warp 10 response', data);
-      }).catch( (error) => {
-        console.error('[poke-uptime] loadWarp10Token - There has been a problem with your fetch operation:',
-            error.message);
-      });
-    }
-    window.setTimeout(() => this.queryServer(), 60000);
-  }
-
-  componentDidLoad() {
-    this.getWarpscript();
-    this.queryServer();
-
-  }
 
   render() {
+    console.log(`[poke-uptime-check] render called ${this.status}`);
     return(
       <div class="poke-check">
         { 
           this.status ?
-            this.status=='up' ?
-            <div class="poke-check-status up"></div> :
-            <div class="poke-check-status down"></div>
+            (typeof this.status == 'string' && (this.status as string).match(/2..|up/)) ||
+            (typeof this.status == 'number' && 
+              (this.status as number) >= 200 && 
+              (this.status as number) < 300 ) ?
+            <div class="poke-check-status up">{this.status}</div> :
+            <div class="poke-check-status down">{this.status}</div>
           :
-          <div class="poke-check-status col-1"></div>
+          <div class="poke-check-status col-1">{this.status}</div>
 
         }
         <div class="poke-check-description col-4 ">

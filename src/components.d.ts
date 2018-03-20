@@ -22,6 +22,36 @@ declare global {
 
 
 import {
+  PokeLogo as PokeLogo
+} from './components/poke-logo/poke-logo';
+
+declare global {
+  interface HTMLPokeLogoElement extends PokeLogo, HTMLStencilElement {
+  }
+  var HTMLPokeLogoElement: {
+    prototype: HTMLPokeLogoElement;
+    new (): HTMLPokeLogoElement;
+  };
+  interface HTMLElementTagNameMap {
+    "poke-logo": HTMLPokeLogoElement;
+  }
+  interface ElementTagNameMap {
+    "poke-logo": HTMLPokeLogoElement;
+  }
+  namespace JSX {
+    interface IntrinsicElements {
+      "poke-logo": JSXElements.PokeLogoAttributes;
+    }
+  }
+  namespace JSXElements {
+    export interface PokeLogoAttributes extends HTMLAttributes {
+      
+    }
+  }
+}
+
+
+import {
   PokeSignIn as PokeSignIn
 } from './components/poke-sign-in/poke-sign-in';
 
@@ -107,7 +137,7 @@ declare global {
     export interface PokeUptimeCheckAttributes extends HTMLAttributes {
       check?: PokeCheck;
       domain?: string;
-      warp10Token?: string;
+      status?: string | number | boolean;
     }
   }
 }

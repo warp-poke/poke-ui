@@ -4,6 +4,7 @@ export interface PokeCheck {
     name?: string,
     secure: boolean,
     path: string,
+    status?: string | number | boolean, 
 }
 
 

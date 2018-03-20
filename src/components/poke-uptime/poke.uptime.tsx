@@ -39,6 +39,7 @@ export class PokeUptime {
     if (!this.authToken) {
       console.log('[poke-uptime] componentDidUpdate - auth token not found');
       this.history.push(`/signin`, {});
+      return;
     }
     if (!this.warp10Token) {
       this.loadWarp10Token();
@@ -120,8 +121,10 @@ export class PokeUptime {
       <div class="services">
         {
           (this.services && this.services.length > 0) ? 
-          this.services.map( (service) =>  
-            <poke-uptime-service service={service} warp10-token={this.warp10Token}></poke-uptime-service> 
+          this.services.map( (service, index) =>
+            index < 100 ?  
+              <poke-uptime-service service={service} warp10-token={this.warp10Token}></poke-uptime-service> 
+            : ''
           ) : 
           '' 
         }
