@@ -107,6 +107,7 @@ declare global {
     export interface PokeUptimeCheckAttributes extends HTMLAttributes {
       check?: PokeCheck;
       domain?: string;
+      warp10Token?: string;
     }
   }
 }
@@ -137,6 +138,7 @@ declare global {
   namespace JSXElements {
     export interface PokeUptimeServiceAttributes extends HTMLAttributes {
       service?: PokeService;
+      warp10Token?: string;
     }
   }
 }

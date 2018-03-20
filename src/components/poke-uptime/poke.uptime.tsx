@@ -13,7 +13,8 @@ export class PokeUptime {
 
   @Prop() history: RouterHistory;
 
-  @State() authToken: String = window.localStorage.getItem('authToken'); 
+  @State() authToken: string = window.localStorage.getItem('authToken'); 
+  @State() warp10Token: string;
   @State() loading: boolean = false;
   @State() services: Array<PokeService>;
 
@@ -36,13 +37,47 @@ export class PokeUptime {
   componentDidLoad() {
     console.log('[poke-uptime] componentDidUpdate ');
     if (!this.authToken) {
-      console.log('[poke-uptime] componentDidUpdate - token not found');
+      console.log('[poke-uptime] componentDidUpdate - auth token not found');
       this.history.push(`/signin`, {});
+    }
+    if (!this.warp10Token) {
+      this.loadWarp10Token();
     }
     if (!this.services) {
       this.loadServices();
     }
   }  
+
+  @Method()
+  loadWarp10Token() {
+    let url: string = `https://warp-poke-scheduler.cleverapps.io/token`;
+    let options: RequestInit = {
+      headers: {
+        'content-type': 'application/json',
+        'Authorization': `Bearer ${this.authToken}`,
+      },
+      mode: 'cors',
+      redirect: 'follow',  
+      method: 'GET',   
+    };   
+
+    fetch(url, options).then( response => {
+      if (!response.ok) {
+        throw new Error(`Response: ${response.status} - ${response.statusText}`);
+      }
+      return response.json();
+    }).then( (data) => {
+      if (!data.token) {
+        throw new Error('No token found in response');
+      }
+      console.log('[poke-uptime] loadWarp10Token - Got Warp 10 token', data.token);
+      this.warp10Token = data.token;
+    }).catch( (error) => {
+      console.error('[poke-uptime] loadWarp10Token - There has been a problem with your fetch operation:',
+          error.message);
+      this.loading = false;
+    });; 
+  }
 
   @Method()
   loadServices() {
@@ -65,7 +100,7 @@ export class PokeUptime {
       }
       return response.json();
     }).then( (data) => {
-      console.log('[poke-uptime] componentDidUpdate - Got services', data);
+      console.log('[poke-uptime] loadServices - Got services', data);
       let services = [];
       data.items.map( (item) => {
         let service: PokeService = item.service;
@@ -74,7 +109,7 @@ export class PokeUptime {
       })
       this.services = services;
     }).catch( (error) => {
-      console.error('[poke-sign-in] handleClick - There has been a problem with your fetch operation:',
+      console.error('[poke-uptime] loadServices - There has been a problem with your fetch operation:',
           error.message);
       this.loading = false;
     });;
@@ -86,7 +121,7 @@ export class PokeUptime {
         {
           (this.services && this.services.length > 0) ? 
           this.services.map( (service) =>  
-            <poke-uptime-service service={service}></poke-uptime-service> 
+            <poke-uptime-service service={service} warp10-token={this.warp10Token}></poke-uptime-service> 
           ) : 
           '' 
         }

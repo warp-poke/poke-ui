@@ -10,6 +10,7 @@ import { PokeService } from '../../utils/interfaces';
 export class PokeUptimeService {
 
     @Prop() service: PokeService; 
+    @Prop() warp10Token: string;
 
 
     render() {
@@ -19,7 +20,10 @@ export class PokeUptimeService {
           <div class="poke-checks">
             {
               this.service.checks.map( (check) =>
-                <poke-uptime-check domain={this.service.domain} check={check}></poke-uptime-check>
+                <poke-uptime-check 
+                    domain={this.service.domain} 
+                    check={check}
+                    warp10-token={this.warp10Token}></poke-uptime-check>
               )
             }
           </div>

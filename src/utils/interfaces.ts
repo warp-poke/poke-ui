@@ -14,3 +14,14 @@ export interface PokeService {
     domain: string,
     checks: Array<PokeCheck>,
 }
+
+export interface Gts {
+    c: string,
+    l: {
+        [dynamic:string]: string,
+    },
+    a: {
+        [dynamic:string]: string,
+    },
+    v: Array<Array<string | boolean | number>>
+}
