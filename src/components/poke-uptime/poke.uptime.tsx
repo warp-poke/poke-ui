@@ -13,7 +13,7 @@ export class PokeUptime {
 
   @Prop() history: RouterHistory;
 
-  @State() token: String = window.localStorage.getItem('token'); 
+  @State() authToken: String = window.localStorage.getItem('authToken'); 
   @State() loading: boolean = false;
   @State() services: Array<PokeService>;
 
@@ -35,7 +35,7 @@ export class PokeUptime {
 
   componentDidLoad() {
     console.log('[poke-uptime] componentDidUpdate ');
-    if (!this.token) {
+    if (!this.authToken) {
       console.log('[poke-uptime] componentDidUpdate - token not found');
       this.history.push(`/signin`, {});
     }
@@ -50,7 +50,7 @@ export class PokeUptime {
     let options: RequestInit = {
       headers: {
         'content-type': 'application/json',
-        'Authorization': `Bearer ${this.token}`,
+        'Authorization': `Bearer ${this.authToken}`,
       },
       mode: 'cors',
       redirect: 'follow',  

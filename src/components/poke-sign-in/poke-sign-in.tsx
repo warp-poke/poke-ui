@@ -52,10 +52,10 @@ export class PokeSignIn {
 
   }
 
-  gotSignInSuccesful(token: string) {
-    console.log("[forge-search] gotSignInSuccesful, token", token);
+  gotSignInSuccesful(authToken: string) {
+    console.log("[forge-search] gotSignInSuccesful, authToken", authToken);
     this.loading = false;
-    window.localStorage.setItem('token', token);
+    window.localStorage.setItem('authToken', authToken);
     this.signInSuccesful.emit();
     this.history.push(`/uptime`, {});
   }

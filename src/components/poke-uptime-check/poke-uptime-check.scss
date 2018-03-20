@@ -1,7 +1,46 @@
 .poke-check {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
 
+    &>div {
+        padding: 0.4rem;
+    }
+
+
+    .poke-check-status {
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        background-color: #cccccc;
+        margin-right: 1rem;
+
+        &.up {
+            background-color: #44ff44;
+        }
+        &.down {
+            background-color: #ff4444;
+        }
+        
+    }
+
+    .poke-check-description {
+        display: float;
+        flex-flow: column nowrap;
+        justify-content: space-around;
+
+        .poke-check-name {
+            font-weight: bold;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .poke-check-url {
+            
+        }
+    }
 }
 
-.poke-check-url {
-    
-}
+
+
+

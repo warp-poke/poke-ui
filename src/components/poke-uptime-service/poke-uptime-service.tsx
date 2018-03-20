@@ -15,7 +15,7 @@ export class PokeUptimeService {
     render() {
       return(
         <div class="poke-service">
-          <h4 class="poke-service-domain">{this.service.domain}</h4>
+          <h5 class="poke-service-domain">{this.service.domain}</h5>
           <div class="poke-checks">
             {
               this.service.checks.map( (check) =>
