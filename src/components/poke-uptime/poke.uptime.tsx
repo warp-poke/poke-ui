@@ -13,7 +13,7 @@ export class PokeUptime {
 
   @Prop() history: RouterHistory;
 
-  @State() authToken: string = window.localStorage.getItem('authToken'); 
+  @State() authToken: string = window.localStorage && window.localStorage.getItem('authToken'); 
   @State() warp10Token: string;
   @State() loading: boolean = false;
   @State() services: Array<PokeService>;
