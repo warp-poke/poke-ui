@@ -1,0 +1,219 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2016 Cityzen Data
+@license Apache 2.0
+-->
+<link rel="import" href=" ../polymer/polymer.html">
+<link rel="import" href=" ../iron-image/iron-image.html">
+<link rel="import" href=" ../granite-spinner/granite-spinner.html">
+<link rel="import" href="../warp10-iron/warp10-warpscript-caller.html">
+
+<dom-module id="warp10-img">
+  <template>
+    <style>
+      :host {
+      }
+
+      #img {
+        width: var(--width, auto);
+        height: var(--height, auto);
+      }
+    </style>
+    <template is="dom-if" if="{{!spinner}}">
+      <granite-spinner
+          color="#ff4081"
+          line-width="0.5em"
+          size="50"
+          active="{{loading}}"></granite-spinner>
+    </template>
+    <iron-image id="img" src="[[img]]" sizing="contain"></iron-image>
+    <warp10-warpscript-caller
+        id="warpscript-caller"
+        url="{{baseURL}}" warpscript="{{warpscriptScript}}"
+        on-response="_handleData"
+        reload="[[reload]]"
+        debug="[[debug]]"
+        block-calls="{{blockCalls}}" call="{{call}}"
+        loading="{{loading}}" auto>
+    </warp10-warpscript-caller>
+
+  </template>
+</dom-module>
+
+<script>
+  // Extend Polymer.Element base class
+  class Warp10Img extends Polymer.Element {
+    static get is() {
+      return 'warp10-img';
+    }
+
+    static get properties() {
+      return {
+        width: {
+          type: Number,
+          value: -1,
+        },
+        height: {
+          type: Number,
+          value: -1,
+        },
+        host: {
+          type: String,
+          value: '',
+        },
+        baseURL: {
+          type: String,
+          computed: 'getBaseUrl(host,oldPath)',
+        },
+        content: {
+          type: String,
+          observer: 'contentChanged',
+        },
+        warpscript: {
+          type: String,
+          observer: 'warpscriptChanged',
+        },
+        data: {
+          type: Object,
+          notify: true,
+          observer: 'dataChanged',
+        },
+        reload: {
+          type: Number,
+          value: -1,
+        },
+        blockCalls: {
+          type: Number,
+          value: 0,
+        },
+        call: {
+          type: Number,
+          value: 0,
+        },
+        oldPath: {
+          type: String,
+          value: '',
+        },
+        loading: {
+          type: Boolean,
+          value: true,
+        },
+        debug: {
+          type: Boolean,
+          value: false,
+        },
+        spinner: {
+          type: Boolean,
+          value: false,
+        },
+      };
+    }
+
+    // ******************************
+    //  Computed properties
+    // ******************************
+    getBaseUrl() {
+      return this.host + '/exec' + this.oldPath;
+    }
+
+    // ******************************
+    // Events Handlers
+    // ******************************
+    _handleData(e) {
+      this.data = e.detail.stack;
+    }
+
+    //  ******************************
+    //  Observers
+    // *******************************
+    contentChanged() {
+      this.generateWarpScript();
+    }
+
+    warpscriptChanged() {
+      this.generateWarpScript();
+    }
+
+    dataChanged() {
+      if (this.data !== null) {
+        this.getImageContent();
+        // console.debug("[warp10-img] dataChanged - Image:\n", this.img);
+      }
+    }
+
+    // ******************************
+    // Livecycle functions
+    // ******************************
+    connectedCallback() {
+      super.connectedCallback();
+      // console.debug("[warp10-img] attached");
+      this.generateWarpScript();
+      // Setting img styles
+      if (this.width > 0) {
+        this.updateStyles({'--width': this.width.toString() + 'px'});
+      }
+      if (this.height > 0) {
+        this.updateStyles({'--height': this.height.toString() + 'px'});
+      }
+
+      this.call = 1;
+    }
+
+    // ******************************
+    // Generate warpscript script
+    // ******************************
+    generateWarpScript() {
+      // If we have warpscript code in attribute, it's prioritary
+      // else we try to get it from content
+      // else we look for it using innerHTML
+      if (this.warpscript !== undefined && this.warpscript.length > 0) {
+        this.warpscriptScript = this.warpscript.trim();
+      } else {
+        if (this.content !== undefined && this.content.length > 0) {
+          this.warpscriptScript = this.content.trim();
+        } else {
+          this.warpscriptScript = Polymer.dom(this).innerHTML.replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+        }
+      }
+
+      // WarpScript
+      let inputWarpScriptVariables = '';
+      if (this.width > 0) {
+        inputWarpScriptVariables += this.width + ' \'width\' STORE ';
+      }
+      if (this.height > 0) {
+        inputWarpScriptVariables += this.height + ' \'height\' STORE ';
+      }
+      this.warpscriptScript = inputWarpScriptVariables + this.warpscriptScript;
+
+      // console.debug("[warp10-img] generateWarpScript - WarpScript script:\n", this.warpscriptScript);
+      return this.warpscriptScript.length > 0;
+    }
+
+    // ******************************
+    // Extract image from answer
+    // ******************************
+    getImageContent() {
+      if (!this.isArray(this.data)) {
+        return;
+      }
+      let response = this.data[0];
+      // console.debug("[warp10-img] getImageContent \n", response);
+      if (/^data:image/.test(response)) {
+        this.img = response;
+        this.loading = false;
+      }
+    }
+
+    // ******************************
+    //  [Helper function] return true if is Array
+    // *******************************
+    isArray(value) {
+      return value && typeof value === 'object' && value instanceof Array && typeof value.length === 'number'
+          && typeof value.splice === 'function' && !(value.propertyIsEnumerable('length'));
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(Warp10Img.is, Warp10Img);
+</script>

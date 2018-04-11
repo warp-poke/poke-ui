@@ -10,7 +10,9 @@
   "extraDependencies": [
     "bower_components/webcomponentsjs/*.js",
     "manifest.json",
-    "bower_components/webcomponentsjs/**"
+    "bower_components/webcomponentsjs/**",
+    "bower_components/d3/**",
+    "bower_components/c3/**"
   ],
   "builds": [
     {

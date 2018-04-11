@@ -15,7 +15,8 @@
     "tests"
   ],
   "dependencies": {
-    "warp10-iron": "LostInBrittany/warp10-iron#^2.0.0"
+    "warp10-iron": "LostInBrittany/warp10-iron#^2.0.0",
+    "warp10-quantumviz": "LostInBrittany/warp10-quantumviz#^2.1.0"
   },
   "resolutions": {
     "polymer": "^2.0.0",

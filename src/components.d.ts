@@ -8,6 +8,7 @@ import {
   RouterHistory,
 } from '@stencil/router';
 import {
+  Gts,
   PokeCheck,
   PokeService,
 } from './utils/interfaces';
@@ -137,6 +138,7 @@ declare global {
     export interface PokeUptimeCheckAttributes extends HTMLAttributes {
       check?: PokeCheck;
       domain?: string;
+      gts?: Gts;
       status?: string | number | boolean;
     }
   }

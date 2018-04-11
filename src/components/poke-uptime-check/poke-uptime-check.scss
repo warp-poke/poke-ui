@@ -27,7 +27,7 @@
         &.down {
             background-color: #8b0909;
         }
-        
+
     }
 
     .poke-check-description {
@@ -37,16 +37,16 @@
 
         .poke-check-name {
             font-weight: bold;
-            white-space: nowrap; 
+            white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         .poke-check-url {
-            
+
         }
     }
+
+    .poke-check-history {
+      height: 100px;
+    }
 }
-
-
-
-

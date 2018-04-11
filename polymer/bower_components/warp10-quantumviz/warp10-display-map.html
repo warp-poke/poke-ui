@@ -1,0 +1,613 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2016 Cityzen Data
+@license Apache 2.0
+-->
+<link rel="import" href=" ../polymer/polymer.html">
+
+<link rel="import" href="../iron-resizable-behavior/iron-resizable-behavior.html">
+
+<link rel="import" href="./warp10-display-map-tools.html">
+<link rel="import" href="../leaflet-map/leaflet-map.html">
+<script src="../Leaflet.MakiMarkers/Leaflet.MakiMarkers.js"></script>
+
+<dom-module id="warp10-display-map">
+  <template>
+    <style>
+      :host {
+        display: block;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        min-width: 480px;
+        min-height: 480px;
+      }
+
+      #map {
+        width: var(--map-width, 100%);
+        height: var(--map-height, 100%);
+        min-width: 480px;
+        min-height: 480px;
+      }
+    </style>
+    <leaflet-map
+        id="map"
+        latitude="{{latitude}}"
+        longitude="{{longitude}}"
+        zoom="{{zoom}}"
+        on-load="_mapLoadedEvt"
+        on-map-ready="_mapReadyEvt"
+        on-resize="_mapResizeEvt"
+        on-viewreset="_mapEvt"
+        use-google-map="[[useGoogleMap]]"
+        google-api-key="[[googleApiKey]]"></leaflet-map>
+  </template>
+
+</dom-module>
+
+<script>
+  // element registration
+
+  /* global warp10ColorTools, warp10DisplayMapTools, L */
+  // Extend Polymer.Element base class
+  class Warp10DisplayMap extends Polymer.mixinBehaviors([Polymer.IronResizableBehavior], Polymer.Element) {
+    static get is() {
+      return 'warp10-display-map';
+    }
+
+    static get properties() {
+      return {
+        /**
+         * The data of the map
+         */
+        data: {
+          type: Object,
+          notify: true,
+          observer: '_dataChanged',
+        },
+
+        tiles: {
+          type: Array,
+          observer: '_dataChanged',
+          value: [],
+        },
+        /**
+         * The level of zoom
+         */
+        zoom: {
+          type: Number,
+          notify: true,
+          value: 10,
+        },
+        /**
+         * The longitude of the map center
+         */
+        longitude: {
+          type: Number,
+          notify: true,
+        },
+        /**
+         * The latitude of the map center
+         */
+        latitude: {
+          type: Number,
+          notify: true,
+        },
+        /**
+         * The selected value set
+         */
+        currentValues: {
+          type: Object,
+          observer: '_currentValuesChanged',
+          notify: true,
+        },
+        /**
+         * The timestamp of the selected annotationsSelectedTimestamp
+         */
+        annotationsSelectedTimestamp: {
+          type: Number,
+          notify: true,
+          observer: '_annotationsSelectedTimestampChanged',
+          value: -1,
+        },
+        /**
+         * If true use Google maps instead of Open Street Map
+         */
+        useGoogleMap: {
+          type: Boolean,
+          value: false,
+        },
+        googleApiKey: {
+          type: String,
+        },
+        /**
+         * If true debug logs are sent to the console
+         */
+        debug: {
+          type: Boolean,
+          value: false,
+        },
+        _DEFAULT_WIDTH: {
+          type: Number,
+          value: 640,
+        },
+        _DEFAULT_HEIGHT: {
+          type: Number,
+          value: 480,
+        },
+      };
+    }
+
+
+    // *************************************************************************
+    // Livecycle
+    // *************************************************************************
+
+    ready() {
+      super.ready();
+      this.addEventListener('resize', (e) => this._onIronResize(e));
+      this.addEventListener('iron-resize', (e) => this._onIronResize(e));
+
+      if (this.debug) {
+        console.log('[warp10-display-map] ready - style',
+          this.style);
+        console.log('[warp10-display-map] ready',
+          `clientWidth: ${this.clientWidth}, clientHeight:${this.clientHeight}`);
+      }
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      if (this.debug) {
+        console.log('[warp10-display-map] connectedCallback');
+      }
+
+      // GTS paths
+      this.polylinesBeforeCurrentValue = [];
+      this.polylinesAfterCurrentValue = [];
+      this.currentValuesMarkers = [];
+
+      // GTS annotations
+      this.annotationsMarkers = [];
+
+      // PositionArrarys
+
+      this.positionArraysMarkers = [];
+      window.warp10DisplayMapTools.debug = this.debug;
+      if (this.debug) {
+        console.log('[warp10-display-map] connectedCallback - attached');
+      }
+      this.isAttached = true;
+      if (this.data !== null) {
+        this._dataChanged();
+      }
+    }
+
+    // *************************************************************************
+    // Observers
+    // *************************************************************************
+
+    _dataChanged() {
+      if (!this.isAttached || !this.mapLoaded) {
+        // Component not ready yet
+        return;
+      }
+      if (this.debug) {
+        console.log('[warp10-display-map] _dataChanged', this.data);
+      }
+      if (this.data !== null) {
+        this._updateMapData();
+      } else {
+        this._removeMapData();
+      }
+    }
+
+    _annotationsSelectedTimestampChanged() {
+      if (this.debug) {
+        console.log('[warp10-display-map] _annotationsSelectedTimestampChanged', this.annotationsSelectedTimestamp);
+      }
+      if (this.annotationsMarkers) {
+        for (let i = 0; i < this.annotationsMarkers.length; i++) {
+          for (let tick = 0; tick < this.annotationsMarkers[i].length; tick++) {
+            if (this.debug) {
+              console.log('[warp10-display-map] _annotationsSelectedTimestampChanged -',
+                  'this.annotationsMarkers[i][tick].options.timestamp',
+                  this.annotationsMarkers[i][tick].options.timestamp);
+            }
+            // We divide by 10 because d3.x precision problem
+            if (Math.floor(
+                    this.annotationsMarkers[i][tick].options.timestamp / 10) ===
+                Math.floor(this.annotationsSelectedTimestamp / 10)
+            ) {
+              if (this.debug) {
+                console.log('[warp10-display-map] _annotationsSelectedTimestampChanged - found',
+                    this.annotationsMarkers[i][tick]);
+              }
+              this.annotationsMarkers[i][tick].options.oldStyle = this.annotationsMarkers[i][tick].options.fillColor;
+              this.annotationsMarkers[i][tick].setStyle({fillColor: 'orange'});
+            } else {
+              if (this.annotationsMarkers[i][tick].options.oldStyle) {
+                this.annotationsMarkers[i][tick].setStyle({
+                  fillColor: this.annotationsMarkers[i][tick].options.oldStyle,
+                });
+                this.annotationsMarkers[i][tick].options.oldStyle = null;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    _currentValuesChanged() {
+      if (!this.currentValues) return;
+      // All works on seconds only now...
+      if (this.debug) {
+        console.log('[warp10-display-map] _currentValuesChanged - Current time ', this.currentValues.xValue,
+            '-', new Date(this.currentValues.xValue), '-', (new Date(this.currentValues.xValue)).getTime());
+      }
+      let currentTS = Math.floor((new Date(this.currentValues.xValue)).getTime() / 1000);
+      this.pathData = this.pathData || [];
+      for (let i = 0; i < this.pathData.length; i++) {
+        for (let j = 0; j < this.pathData[i].path.length; j++) {
+          if (this.debug) {
+            console.log('[warp10-display-map] _currentValuesChanged - Do they match? ', currentTS,
+                '-', this.pathData[i].path[j].ts);
+          }
+          if (currentTS <= Math.floor(this.pathData[i].path[j].ts / 1000)) {
+            this.currentValuesMarkers[i].setLatLng([this.pathData[i].path[j].lat, this.pathData[i].path[j].lon]);
+            this.polylinesBeforeCurrentValue[i].setLatLngs(
+                warp10DisplayMapTools.pathDataToLeaflet(this.pathData[i].path, {to: j}));
+            this.polylinesAfterCurrentValue[i].setLatLngs(
+                warp10DisplayMapTools.pathDataToLeaflet(this.pathData[i].path, {from: j}));
+            break;
+          }
+        }
+      }
+    }
+
+    // *************************************************************************
+    // Event listeners
+    // *************************************************************************
+
+    _onIronResize(evt) {
+      this.resize();
+      if (this.debug) {
+        console.log('[warp10-display-map]_onIronResize', evt);
+        console.log('[warp10-display-map] _onIronResize - element clientSizes',
+            this.clientWidth, this.clientHeight);
+        console.log('[warp10-display-map] _onIronResize - map clientSizes',
+            this.$.map.clientWidth, this.$.map.clientHeight);
+        console.log('[warp10-display-map] _onIronResize - map dimensions',
+            this.$.map.style.width, this.$.map.style.height);
+      }
+    }
+
+    _mapLoadedEvt() {
+      if (this.debug) {
+        console.log('[warp10-display-map] Map loaded!', {
+          obj: this.$.map,
+          map: this.$.map.map,
+          longitude: this.$.map.longitude,
+          latitude: this.$.map.latitude,
+          zoom: this.$.map.zoom,
+          size: {w: this.$.map.style.width, h: this.$.map.style.height},
+        });
+      }
+      this.mapLoaded = true;
+      if (this.data !== null) {
+        this._dataChanged();
+      }
+    }
+
+    _mapReadyEvt() {
+      if (this.debug) {
+        console.log('[warp10-display-map] Map ready!', {
+          obj: this.$.map,
+          map: this.$.map.map,
+          longitude: this.$.map.longitude,
+          latitude: this.$.map.latitude,
+          zoom: this.$.map.zoom,
+          size: {w: this.$.map.style.width, h: this.$.map.style.height},
+        });
+      }
+      this.mapReady = true;
+      if (this.data !== null) {
+        this._dataChanged();
+      }
+    }
+
+    _mapResizeEvt() {
+      if (this.debug) {
+        console.log('[warp10-display-map] Map resize!', {
+          obj: this.$.map,
+          map: this.$.map.map,
+          longitude: this.$.map.longitude,
+          latitude: this.$.map.latitude,
+          zoom: this.$.map.zoom,
+          size: {w: this.$.map.style.width, h: this.$.map.style.height},
+        });
+      }
+    }
+
+    _mapEvt(evt) {
+      if (this.debug) {
+        console.log('[warp10-display-map] Map evt!', evt, {
+          obj: this.$.map,
+          map: this.$.map.map,
+          longitude: this.$.map.longitude,
+          latitude: this.$.map.latitude,
+          zoom: this.$.map.zoom,
+          size: {w: this.$.map.style.width, h: this.$.map.style.height},
+        });
+      }
+    }
+
+    // *************************************************************************
+    // Instance methods
+    // *************************************************************************
+
+    resize() {
+      this.updateStyles({'--map-height': this.clientHeight + 'px'});
+      this.updateStyles({'--map-width': this.clientWidth + 'px'});
+    }
+
+    _updateMapData() {
+      if (this.debug) {
+        console.log('[warp10-display-map] _updateMapData', this.data);
+      }
+
+      if (this.layerGroup) {
+        this._removeMapData();
+      }
+
+      this.pathData = warp10DisplayMapTools.toLeafletMapPaths(this.data);
+      this.annotationsData = warp10DisplayMapTools.annotationsToLeafletPositions(this.data);
+      this.positionData = warp10DisplayMapTools.toLeafletMapPositionArray(this.data);
+      if (this.debug) {
+        console.log('[warp10-display-map] Data changed - path data', this.pathData);
+        console.log('[warp10-display-map] Data changed - position arrays', this.positionData);
+        console.log('[warp10-display-map] Data changed - annotations data', this.annotationsData);
+      }
+
+      let map = this.$.map.map;
+
+      this.layerGroup = L.layerGroup().addTo(map);
+
+      if (this.debug) {
+        console.log('[warp10-display-map] Data changed - map', this.$.map);
+      }
+
+      // let circleRadius = map.getBounds().getSouthWest().distanceTo(map.getBounds().getNorthEast()) / 30;
+      // Create the polylines and the circle marker
+      for (let i = 0; i < this.pathData.length; i++) {
+        let plottedGts = this._updateGtsPath(this.pathData[i]);
+        this.polylinesBeforeCurrentValue.push(plottedGts.beforeCurrentValue);
+        this.polylinesAfterCurrentValue.push(plottedGts.afterCurrentValue);
+        this.currentValuesMarkers.push(plottedGts.currentValue);
+      }
+
+      if (this.debug) {
+        console.log('[warp10-display-map] GTS path added', this.pathData);
+      }
+
+      for (let i = 0; i < this.annotationsData.length; i++) {
+        this.annotationsMarkers.push(this._updateAnnotation(this.annotationsData[i]));
+      }
+      if (this.debug) {
+        console.log('[warp10-display-map] Annotations added', this.annotationsMarkers);
+      }
+
+      // Create the positions arrays
+      for (let i = 0; i < this.positionData.length; i++) {
+        this.positionArraysMarkers = this._updatePositionArray(this.positionData[i]);
+      }
+      if (this.debug) {
+        console.log('[warp10-display-map] Position array added', this.positionArraysMarkers);
+      }
+
+      this.tiles.forEach(function(t) {
+        console.log('Adding tiles : ', t);
+        this.addLayer(L.tileLayer(t));
+      }, this.layerGroup);
+
+      if (this.pathData.length > 0 || this.positionData.length > 0 || this.annotationsData.length > 0) {
+        // Fit map to curves
+        let bounds = warp10DisplayMapTools.getBoundsArray(
+            this.pathData,
+            this.positionData,
+            this.annotationsData);
+
+        if (this.debug) {
+          console.log('[warp10-display-map] getBoundsArray', bounds);
+        }
+        window.setTimeout(() => {
+          if (this.debug) {
+            console.log('[warp10-display-map] invalidateSize', this.map);
+          }
+          // Without the timeout tiles doesn't show, see https://github.com/Leaflet/Leaflet/issues/694
+          map.invalidateSize();
+          this.configure();
+          if (bounds.length > 1) {
+            map.fitBounds(L.latLngBounds(bounds[0], bounds[1], {padding: [20, 20]}));
+            if (this.debug) {
+              console.log('[warp10-display-map] zoom', this.zoom, map.getZoom());
+            }
+            if (map.getZoom() === 0 || this.zoom < map.getZoom()) {
+              map.setZoom(this.zoom);
+            }
+          } else {
+            map.setView(bounds[0], this.zoom);
+          }
+        }, 1000);
+      } else {
+        window.setTimeout(() => {
+          if (this.debug) {
+            console.log('[warp10-display-map] invalidateSize', this.map);
+          }
+          map.invalidateSize();
+          this.configure();
+        }, 1000);
+      }
+    }
+
+    _updateGtsPath(gts) {
+      let beforeCurrentValue = L.polyline(
+          warp10DisplayMapTools.pathDataToLeaflet(gts.path, {to: 0}), {
+            color: gts.color,
+            opacity: 1,
+          });
+      this.layerGroup.addLayer(beforeCurrentValue);
+      let afterCurrentValue = L.polyline(
+          warp10DisplayMapTools.pathDataToLeaflet(gts.path, {from: 0}), {
+            color: gts.color,
+            opacity: 0.5,
+          });
+      this.layerGroup.addLayer(afterCurrentValue);
+      let currentValue;
+      // Let's verify we have a path... No path, no marker
+      if (gts.path[0] !== undefined) {
+        currentValue = L.circleMarker([gts.path[0].lat, gts.path[0].lon],
+            {radius: 5, color: '#fff', fillColor: gts.color, fillOpacity: 1});
+      } else {
+        currentValue = L.circleMarker();
+      }
+      this.layerGroup.addLayer(currentValue);
+      return {
+        beforeCurrentValue: beforeCurrentValue,
+        afterCurrentValue: afterCurrentValue,
+        currentValue: currentValue,
+      };
+    }
+
+    _updateAnnotation(gts) {
+      let positions = [];
+      let icon;
+      switch (gts.render) {
+        case 'marker':
+          icon = L.MakiMarkers.icon({icon: gts.marker, color: gts.color, size: 'm'});
+          for (let j = 0; j < gts.path.length; j++) {
+            let marker = L.marker(gts.path[j], {icon: icon, opacity: 1});
+            marker.bindPopup(gts.path[j].val.toString());
+            this.layerGroup.addLayer(marker);
+            positions.push(marker);
+          }
+          break;
+        case 'dots':
+        default:
+          for (let j = 0; j < gts.path.length; j++) {
+            let marker = L.circleMarker(
+                gts.path[j], {
+                  radius: gts.baseRadius,
+                  color: gts.color,
+                  fillColor: gts.color,
+                  fillOpacity: 1,
+                  timestamp: gts.path[j].ts,
+                }
+            );
+            marker.bindPopup(gts.path[j].val.toString());
+            this.layerGroup.addLayer(marker);
+            if (this.debug) {
+              console.log('[warp10-display-map] _plotAnnotation - gts', gts);
+            }
+            positions.push(marker);
+          }
+          break;
+      }
+      return positions;
+    }
+
+    _updatePositionArray(positionData) {
+      if (this.debug) {
+        console.log('[warp10-display-map] _plotPositionArray - item', positionData);
+      }
+      let positions = [];
+      let polyline;
+      let icon;
+      let result;
+      let inStep;
+
+      switch (positionData.render) {
+        case 'path':
+          polyline = L.polyline(positionData.positions, {color: positionData.color, opacity: 1});
+          this.layerGroup.addLayer(polyline);
+          positions.push(polyline);
+          break;
+        case 'marker':
+          icon = L.MakiMarkers.icon({icon: positionData.key, color: positionData.color, size: 'm'});
+          for (let j = 0; j < positionData.positions.length; j++) {
+            let marker = L.marker({lat: positionData.positions[j][0], lon: positionData.positions[j][1]}, {
+              icon: icon,
+              opacity: 1,
+            });
+            this.layerGroup.addLayer(marker);
+            positions.push(marker);
+          }
+          break;
+        case 'coloredWeightedDots':
+          result = [];
+          inStep = [];
+          for (let j = 0; j < positionData.numColorSteps; j++) {
+            result[j] = 0;
+            inStep[j] = 0;
+          }
+          for (let j = 0; j < positionData.positions.length; j++) {
+            if (this.debug) {
+              console.log('[warp10-display-map] _plotPositionArray, coloredWeightedDots', {
+                j: j,
+                gradient: positionData.colorGradient,
+                position: positionData.positions[j],
+              });
+            }
+            let marker = L.circleMarker(
+                {lat: positionData.positions[j][0], lon: positionData.positions[j][1]}, {
+                  radius: positionData.baseRadius * (parseInt(positionData.positions[j][4]) + 1),
+                  color: positionData.borderColor,
+                  fillColor: warp10ColorTools.rgb2hex(
+                      positionData.colorGradient[positionData.positions[j][5]].r,
+                      positionData.colorGradient[positionData.positions[j][5]].g,
+                      positionData.colorGradient[positionData.positions[j][5]].b),
+                  fillOpacity: 1,
+                });
+            this.layerGroup.addLayer(marker);
+            positions.push(marker);
+          }
+          break;
+        case 'weightedDots':
+          for (let j = 0; j < positionData.positions.length; j++) {
+            let marker = L.circleMarker(
+                {lat: positionData.positions[j][0], lon: positionData.positions[j][1]}, {
+                  radius: positionData.baseRadius * (parseInt(positionData.positions[j][4]) + 1),
+                  color: positionData.borderColor,
+                  fillColor: positionData.color, fillOpacity: 1,
+                });
+            this.layerGroup.addLayer(marker);
+            positions.push(marker);
+          }
+          break;
+        case 'dots':
+        default:
+          for (let j = 0; j < positionData.positions.length; j++) {
+            let marker = L.circleMarker(
+                {lat: positionData.positions[j][0], lon: positionData.positions[j][1]}, {
+                  radius: positionData.baseRadius,
+                  color: positionData.borderColor,
+                  fillColor: positionData.color,
+                  fillOpacity: 1,
+                });
+            this.layerGroup.addLayer(marker);
+            positions.push(marker);
+          }
+          break;
+      }
+      return positions;
+    }
+
+    _removeMapData() {
+      let map = this.$.map.map;
+      map.removeLayer(this.layerGroup);
+    }
+  }
+
+  // Register custom element definition using standard platform API
+  customElements.define(Warp10DisplayMap.is, Warp10DisplayMap);
+</script>

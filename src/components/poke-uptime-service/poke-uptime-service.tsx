@@ -9,11 +9,11 @@ import { PokeService, Gts, PokeCheck } from '../../utils/interfaces';
 })
 export class PokeUptimeService {
 
-    @Prop() service: PokeService; 
+    @Prop() service: PokeService;
     @Prop() warp10Token: string;
 
     @State() warpscript: string;
-  
+
     @State() url: string = `https://gra1-poke.metrics.ovh.net/api/v0/exec`;
     @State() options: RequestInit;
 
@@ -32,12 +32,19 @@ export class PokeUptimeService {
     getWarpscript() {
       console.log('[poke-uptime-check] getWarpscript', this.warpscript);
       this.warpscript = `
-        '${this.warp10Token}'  
-        'http.response.time' { 'service_id'  '${this.service.service_id}' }
-        NOW 6 h 
-        FETCH
         [
-          '${this.warp10Token}'  
+          '${this.warp10Token}'
+          'http.response.time' { 'service_id'  '${this.service.service_id}' }
+          NOW 6 h
+          FETCH
+          bucketizer.mean
+          NOW
+          0
+          150
+        ] BUCKETIZE
+
+        [
+          '${this.warp10Token}'
           'http.response.status' { 'service_id'  '${this.service.service_id}' }
           NOW 6 h
           FETCH
@@ -49,17 +56,17 @@ export class PokeUptimeService {
 
       `;
     }
-  
-    @Watch('warpscript')  
+
+    @Watch('warpscript')
     prepareQuery() {
       console.log('[poke-uptime-check] prepareQuery', this.warpscript);
       this.options = {
         headers: {},
         mode: 'cors',
-        redirect: 'follow',  
-        method: 'POST',   
+        redirect: 'follow',
+        method: 'POST',
         body: this.warpscript,
-      };   
+      };
     }
 
     queryServer() {
@@ -84,7 +91,7 @@ export class PokeUptimeService {
       this.getChecks();
       this.getWarpscript();
       this.queryServer();
-  
+
     }
 
 
@@ -93,11 +100,12 @@ export class PokeUptimeService {
         throw(`Warp 10 response doens't fit expected format`);
       }
       let httpResponseStatus = stack[0];
+      let httpResponseTime = stack[1];
 
       console.log(`[poke-uptime] httpResponseStatus`,httpResponseStatus);
 
       httpResponseStatus.map( (item) => {
-        this.checks.forEach( (check, index) => {       
+        this.checks.forEach( (check, index) => {
           console.log(`[poke-uptime] httpResponseStatus ${check.check_id}`);
 
           if (check.check_id == item.l.check_id) {
@@ -105,8 +113,19 @@ export class PokeUptimeService {
             console.log(`[poke-uptime-service] httpResponseStatus ${item.v[0][item.v[0].length-1]} for service ${check.service_id} and check ${check.check_id}`, this.checks[index]);
           }
         });
-        this.checks = [ ...this.checks ]; 
       });
+
+      httpResponseTime.map( (item) => {
+        this.checks.forEach( (check, index) => {
+          console.log(`[poke-uptime] httpResponseTime ${check.check_id}`);
+
+          if (check.check_id == item.l.check_id) {
+            this.checks[index].gts = item;
+          }
+        });
+      });
+      this.checks = [ ...this.checks ];
+
     }
 
     render() {
@@ -117,10 +136,11 @@ export class PokeUptimeService {
           <div class="poke-checks">
             {
               this.checks.map( (check) =>
-                <poke-uptime-check 
-                    domain={this.service.domain} 
+                <poke-uptime-check
+                    domain={this.service.domain}
                     status={check.status}
                     check={check}
+                    gts={check.gts}
                     warp10-token={this.warp10Token}></poke-uptime-check>
               )
             }

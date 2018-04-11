@@ -1,0 +1,81 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2016 Cityzen Data
+@license Apache 2.0
+-->
+<!doctype html>
+<html>
+<head>
+  <title>warp10-geoquantumviz demo</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="stylesheet" href="../../bootstrap/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../../prism/themes/prism.css"/>
+  <link rel="stylesheet" href="../../prism/plugins/unescaped-markup/prism-unescaped-markup.css"/>
+  <script src="../../prism/prism.js"></script>
+  <script src="../../prism/plugins/unescaped-markup/prism-unescaped-markup.js"></script>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href=" ../../polymer/polymer.html">
+
+  <link rel="import" href=" ../warp10-geoquantumviz.html">
+
+
+  <style>
+    /* .current-value {
+       padding-left: 100px;
+     }
+ */
+    warp10-geoquantumviz {
+      width: 100%;
+    }
+  </style>
+
+
+<body unresolved>
+
+<div class="container">
+
+  <h1>GeoQuantumviz colored and weighted dots</h1>
+
+  <warp10-geoquantumviz
+      width="800" height="350" debug  current-values="{{current}}"
+      show-axis="true" tooltip="true" line-width="2" reload="0"
+      host="https://warp.cityzendata.net/dist/api/v0" old-path="">
+    [ { 'positions' [
+        [ 51.10 0.50 20 00 ] [ 51.10 0.52 20 05 ] [ 51.10 0.54 20 10 ] [ 51.10 0.56 20 15 ]
+        [ 51.10 0.58 20 20 ] [ 51.10 0.60 20 25 ] [ 51.10 0.62 20 30 ] [ 51.10 0.64 20 35 ]
+        [ 51.10 0.66 20 40 ] [ 51.10 0.68 20 45 ] [ 51.10 0.70 20 50 ]
+    ] } ] 'gts' STORE
+
+    [ {
+      'key' 'points' 'render' 'coloredWeightedDots' 'maxValue' 100 'minValue' 0 'baseRadius' 5 'numSteps' 10
+      'maxColorValue' 50 'minColorValue' 0 'numColorSteps' 5 'startColor' '#ff0000' 'endColor' '#00ff00'
+    } ] 'params' STORE
+
+    { 'interpolate' 'cardinal' } 'globalParams' STORE
+
+    { 'gts' $gts 'params' $params 'globalParams' $globalParams }
+  </warp10-geoquantumviz>
+
+  <template is="dom-if" if="{{current}}">
+    <div class="current-value">
+      <b>Current values:</b>
+      <br/>
+      x: <span>{{current.xValue}}</span>
+      <br/>
+      <ul>
+        <template is="dom-repeat" items="{{current.yValues}}">
+          <li>
+            key: <span>{{item.key}}</span>
+            value: <span>{{item.value}}</span>
+          </li>
+        </template>
+      </ul>
+    </div>
+  </template>
+  <p>By <a href="http://cityzendata.com">Cityzen Data</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+{
+  "name": "leaflet-map",
+  "version": "1.2.0-9",
+  "authors": [
+    "Hendrik Brummermann <nhnb@users.sourceforge.net>",
+    "Prateek Saxena <prtksxna@gmail.com>"
+  ],
+  "description": "Leaflet map as web-component based on polymer",
+  "main": "leaflet-map.html",
+  "homepage": "https://leaflet-extras.github.io/leaflet-map/",
+  "keywords": [
+    "polymer",
+    "web-components",
+    "leaflet",
+    "leafletjs",
+    "map"
+  ],
+  "license": "BSD 2-Clause",
+  "ignore": [
+    "**/.*",
+    "demo.html",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.0",
+    "leaflet": "^1.2.0",
+    "Leaflet.GridLayer.GoogleMutant": "https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant.git"
+  },
+  "devDependencies": {
+    "iron-ajax": "PolymerElements/iron-ajax#^2.0.5"
+  },
+  "_release": "1.2.0-9",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.2.0-9",
+    "commit": "dd2b13540b72716f58513b53acbc0142b5141f71"
+  },
+  "_source": "https://github.com/Giwi/leaflet-map.git",
+  "_target": "v1.2.0-9",
+  "_originalSource": "Giwi/leaflet-map"
+}

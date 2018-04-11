@@ -1,0 +1,345 @@
+<!--
+@author Horacio Gonzalez (@lostinbrittany)
+@copyright (c) 2016 Cityzen Data
+@license Apache 2.0
+-->
+<link rel="import" href=" ../polymer/polymer.html">
+<link rel="import" href="./quantumviz-tools.html">
+
+<dom-module id="quantumviz-annotation">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .annotation {
+        position: relative;
+        display: block;
+      }
+
+      .annotation svg {
+        display: block;
+        border: solid 1px black;
+        height: 20px;
+
+      }
+
+      .annotation-tooltip {
+        position: absolute;
+        min-width: 200px;
+        height: auto;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.75);
+        border-radius: 10px;
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .annotation-tooltip.hidden {
+        display: none;
+      }
+
+      .annotation-tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 10pt;
+        line-height: 20px;
+      }
+
+      .gts-classname {
+        color: #0074D9;
+      }
+
+      .gts-labelname {
+        color: #3d9970;
+      }
+
+      .gts-separator {
+        color: #bbbbbb;
+      }
+
+      .gts-labelvalue {
+        color: #AAAAAA;
+        font-style: italic;
+      }
+    </style>
+    <div class="annotation">
+      <svg id="svg"></svg>
+      <div class="annotation-tooltip hidden">
+        <p><strong class="timestamp"></strong></p>
+        <p><span class="name"></span> - <span class="value"></span></p>
+      </div>
+    </div>
+  </template>
+</dom-module>
+
+<script>
+  /* globals d3 */
+  // Extend Polymer.Element base class
+  class Warp10QuantumvizAnnotation extends Polymer.Element {
+    static get is() {
+      return 'quantumviz-annotation';
+    }
+
+    static get properties() {
+      return {
+        width: {
+          type: Number,
+          value: -1,
+        },
+        /**
+         * Displayed data time bounds
+         */
+        timeBounds: {
+          type: Object,
+          observer: 'contentChanged',
+        },
+        /**
+         * The chart area
+         */
+        chartArea: {
+          type: Array,
+          observer: '_changeDimensions',
+        },
+        annotation: {
+          type: Array,
+        },
+        vertGuide: {
+          type: Number,
+          notify: true,
+        },
+        selectedTimestamp: {
+          type: Number,
+          notify: true,
+          observer: '_selectedTimestampChanged',
+          value: -1,
+        },
+        debug: {
+          type: Boolean,
+          value: false,
+        },
+      };
+    }
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.SVG_MARGIN_LEFT = 55;
+      this.SVG_MARGIN_RIGHT = 8;
+      this.SVG_STROKE_WIDTH = 2;
+      this.NVD3_CHART_RIGHT_MARGIN = 20;
+      this.MAX_MARKER_WIDTH = 10;
+      this.setDimensions();
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] attached()');
+      }
+      this.isAttached = true;
+      this.contentChanged();
+    }
+
+    setDimensions() {
+      if (this.dimensionAlreadyChanged) {
+        return;
+      }
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] setDimensions');
+      }
+      this.root.querySelector('.annotation').style.paddingLeft = this.SVG_MARGIN_LEFT + 'px';
+      this.root.querySelector('.annotation').style.paddingRight = this.SVG_MARGIN_RIGHT + 'px';
+      // Dimensions
+      this.root.querySelector('.annotation').style.width = 'calc(100% -' +
+          this.root.querySelector('.annotation').style.paddingLeft + ' -' +
+          this.root.querySelector('.annotation').style.paddingRight +');';
+      this.root.querySelector('svg').style.width = '100%';
+    }
+
+    _changeDimensions() {
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] _changeDimensions', this.chartArea);
+      }
+      this.root.querySelector('.annotation').style.paddingLeft = this.chartArea.x + 'px';
+      this.root.querySelector('svg').style.width = this.chartArea.w + 'px';
+      this.SVG_MARGIN_LEFT = this.chartArea.x;
+      this.dimensionAlreadyChanged = true;
+    }
+
+    _selectedTimestampChanged() {
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] _selectedTimestampChanged', this.selectedTimestamp);
+      }
+    }
+
+    contentChanged() {
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] Content changed', this.annotation);
+      }
+
+      let context = this;
+      if (!this.isAttached || !this.timeBounds) {
+        return;
+      }
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] Content changed - isAttached');
+      }
+
+      let svgMarginLeft = this.SVG_MARGIN_LEFT;
+      let svgStrokeWidth = this.SVG_STROKE_WIDTH;
+
+      let annotationD3 = d3.select(context.root.querySelector('.annotation'));
+
+      let svg = annotationD3.select('svg');
+
+      let width;
+      if (this.root.querySelector('svg').getBoundingClientRect().width > 0) {
+        width = this.root.querySelector('svg').getBoundingClientRect().width;
+      } else {
+        width = this.root.querySelector('.annotation').getBoundingClientRect().width -
+            this.SVG_MARGIN_LEFT - this.NVD3_CHART_RIGHT_MARGIN;
+      }
+
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] contentChanged - timeBounds', [this.timeBounds.min, this.timeBounds.max]);
+        console.debug('[quantumviz-annotation] contentChanged - width',
+            width, this.NVD3_CHART_RIGHT_MARGIN, this.root.querySelector('svg').definedWidth);
+        console.debug('[quantumviz-annotation] annotation', this.annotation);
+      }
+
+      let scale = d3.scale.linear()
+          .domain([this.timeBounds.min, this.timeBounds.max])
+          .range([0, width]);
+
+      let annotation = this.annotation;
+
+      let markerWidth = width / annotation.values.length - 2;
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] markerWidth', markerWidth);
+      }
+      if (markerWidth > this.MAX_MARKER_WIDTH) {
+        markerWidth = this.MAX_MARKER_WIDTH;
+      }
+      if (this.debug) {
+        console.debug('[quantumviz-annotation] this.MAX_MARKER_WIDTH', this.MAX_MARKER_WIDTH);
+        console.debug('[quantumviz-annotation] markerWidth', markerWidth);
+      }
+
+
+      let annotationMouseover = (d) => {
+        // let annotationLeftOffset = context.$.svg.getBoundingClientRect().left;
+        context.selectedTimestamp = d.x;
+        d3.select(this).attr('fill', 'orange');
+        annotationD3.select('.annotation-tooltip').select('.timestamp')
+            .text(d3.time.format.utc('%Y-%m-%dT%H:%M:%S.%LZ')(new Date(d.x)));
+
+        annotationD3.select('.annotation-tooltip').select('.name')
+            .html(keyFormatter(annotation.key));
+
+        annotationD3.select('.annotation-tooltip').select('.value')
+            .text(d.y);
+
+        // Show the tooltip
+        annotationD3.select('.annotation-tooltip').classed('hidden', false);
+
+        let tooltipWidth = annotationD3.select('.annotation-tooltip').node().getBoundingClientRect().width;
+        let xPosition = parseInt(d3.select(this).attr('x')) +
+            markerWidth / 2 + svgStrokeWidth / 2 + svgMarginLeft - tooltipWidth / 2;
+        if (xPosition < 0) {
+          xPosition = 0;
+        }
+        let yPosition = 30;
+
+        // Update the tooltip position and value
+        annotationD3.select('.annotation-tooltip')
+            .style('left', xPosition + 'px')
+            .style('bottom', yPosition + 'px');
+        if (this.debug) {
+          console.debug('[quantumviz-annotation] annotationMouseover', {
+            x: d.x,
+            scaledX: scale(d.x),
+            svgMarginLeft: svgMarginLeft,
+          });
+        }
+        context.vertGuide = scale(d.x) + svgMarginLeft - svgStrokeWidth / 2;
+      };
+
+      let annotationMouseout = (d) => {
+        context.selectedTimestamp = -1;
+        d3.select(this).attr('fill', annotation.color);
+        // Hide the tooltip
+        annotationD3.select('.annotation-tooltip').classed('hidden', true);
+        context.vertGuide = -1;
+      };
+
+      let keyFormatter = (d, i) => {
+        let outsideCurlyBrackets = d.split(/\{[^}]*\}/);
+        if (context.debug) {
+          console.debug('[quantumviz-annotation] keyFormatter ', outsideCurlyBrackets);
+        }
+
+        let insideCurlyBrackets = [];
+        let insideRegex = /\{([^}]*)\}/g;
+        let matches;
+        while ((matches = insideRegex.exec(d)) !== null) {
+          insideCurlyBrackets.push(matches[1]);
+        }
+        if (context.debug) {
+          console.debug('[quantumviz-annotation] keyFormatter ', insideCurlyBrackets);
+        }
+
+
+        let html = '';
+
+        outsideCurlyBrackets.forEach((className, i) => {
+          html += '<span class="gts-classname">' + className + '</span>';
+
+          if (insideCurlyBrackets.length > i) {
+            html += '<span class="gts-separator">{</span>';
+            let labels = [];
+            insideCurlyBrackets[i].split(',').forEach(function(it) {
+              let item = it.split('=');
+              let label = '<span class="gts-labelname">' + item[0] + '</span>';
+              if (item.length > 1) {
+                label += '<span class="gts-separator">=</span><span class="gts-labelvalue">' + item[1] + '</span>';
+              }
+              labels.push(label);
+            });
+            html += labels.join('<span class="gts-separator">,</span>') + '<span class="gts-separator">}</span>';
+          }
+        });
+        if (context.debug) {
+          console.debug('[quantumviz-annotation] keyFormatter ', html);
+        }
+        return html;
+      };
+
+      svg.selectAll('rect').data(annotation.values)
+          .attr('x', function(d, i) {
+            return scale(d.x) - markerWidth / 2 - svgStrokeWidth / 2;
+          }).attr('y', 0)
+          .attr('width', markerWidth)
+          .attr('height', 20)
+          .attr('fill', annotation.color)
+          .attr('stroke', 'white')
+          .attr('stroke-width', svgStrokeWidth)
+          .on('mouseover', annotationMouseover)
+          .on('mouseout', annotationMouseout);
+
+      svg.selectAll('rect').data(annotation.values)
+          .enter()
+          .append('rect')
+          .attr('x', function(d, i) {
+            return scale(d.x) - markerWidth / 2 - svgStrokeWidth / 2;
+          })
+          .attr('y', 0)
+          .attr('width', markerWidth)
+          .attr('height', 20)
+          .attr('fill', annotation.color)
+          .attr('stroke', 'white')
+          .attr('stroke-width', svgStrokeWidth)
+          .on('mouseover', annotationMouseover)
+          .on('mouseout', annotationMouseout);
+    }
+  }
+  // Register custom element definition using standard platform API
+  customElements.define(Warp10QuantumvizAnnotation.is, Warp10QuantumvizAnnotation);
+</script>
