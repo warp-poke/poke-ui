@@ -10,7 +10,7 @@
     "build": "stencil build --prerender",
     "dev": "sd concurrent \"stencil build --dev --watch\" \"stencil-dev-server\" ",
     "serve": "stencil-dev-server",
-    "start": "npm run dev",
+    "start": "node server.js",
     "test": "jest --no-cache",
     "test.watch": "jest --watch --no-cache",
     "prepublish": "npm run build"
