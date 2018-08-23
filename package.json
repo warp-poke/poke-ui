@@ -1,33 +1,30 @@
 {
   "name": "poke-ui",
   "private": true,
-  "version": "0.0.1",
   "description": "Poke UI",
+  "module": "dist/esm/index.js",
+  "main": "dist/index.js",
+  "types": "dist/types/components.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
   "files": [
     "dist/"
   ],
   "scripts": {
     "build": "stencil build --prerender",
-    "dev": "sd concurrent \"stencil build --dev --watch\" \"stencil-dev-server\" ",
-    "serve": "stencil-dev-server",
-    "start": "node server.js",
-    "test": "jest --no-cache",
-    "test.watch": "jest --watch --no-cache",
-    "prepublish": "npm run build",
-    "install": "npm run build"
+    "start": "stencil build --dev --watch --serve",
+    "test": "jest",
+    "test.watch": "jest --watch"
   },
   "dependencies": {
-    "@stencil/core": "^0.6.1",
-    "@stencil/router": "0.0.28",
-    "@stencil/sass": "0.0.3",
+    "@stencil/core": "^0.11.0",
+    "@stencil/router": "^0.2.5",
+    "@stencil/sass": "0.1.0",
     "node-static": "^0.7.10",
-    "spectre.css": "^0.5.1"
+    "spectre.css": "^0.5.3"
   },
   "devDependencies": {
-    "@stencil/dev-server": "latest",
-    "@stencil/utils": "latest",
-    "@types/jest": "^21.1.1",
-    "jest": "^21.2.1"
+    "@types/jest": "^23.3.1",
+    "jest": "^23.4.2"
   },
   "repository": {
     "type": "git",
@@ -51,5 +48,6 @@
       "json",
       "jsx"
     ]
-  }
+  },
+  "version": "0.3.0"
 }

@@ -123,7 +123,7 @@ export class PokeUptime {
           (this.services && this.services.length > 0) ? 
           this.services.map( (service, index) =>
             index < 100 ?  
-              <poke-uptime-service service={service} warp10-token={this.warp10Token}></poke-uptime-service> 
+              <poke-uptime-service service={service} warp10Token={this.warp10Token}></poke-uptime-service> 
             : ''
           ) : 
           '' 

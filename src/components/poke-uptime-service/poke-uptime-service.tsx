@@ -25,12 +25,12 @@ export class PokeUptimeService {
         return;
       }
       this.checks = [ ...this.service.checks ];
-      console.log(`[poke-uptime-check] getChecks`, this.checks);
+      console.log(`[poke-uptime-service] getChecks`, this.checks);
     }
 
     @Watch('warp10Token')
     getWarpscript() {
-      console.log('[poke-uptime-check] getWarpscript', this.warpscript);
+      console.log('[poke-uptime-service] getWarpscript', this.warpscript);
       this.warpscript = `
         [
           '${this.warp10Token}'
@@ -59,7 +59,7 @@ export class PokeUptimeService {
 
     @Watch('warpscript')
     prepareQuery() {
-      console.log('[poke-uptime-check] prepareQuery', this.warpscript);
+      console.log('[poke-uptime-service] prepareQuery', this.warpscript);
       this.options = {
         headers: {},
         mode: 'cors',
@@ -77,10 +77,10 @@ export class PokeUptimeService {
           }
           return response.json();
         }).then( (data) => {
-          console.log('[poke-uptime-check] queryServer - Got Warp 10 response', data);
+          console.log('[poke-uptime-service] queryServer - Got Warp 10 response', data);
           this.gotResponse(data);
         }).catch( (error) => {
-          console.error('[poke-uptime] loadWarp10Token - There has been a problem with your fetch operation:',
+          console.error('[poke-uptime-service] queryServer - There has been a problem with your fetch operation:',
               error.message);
         });
       }
@@ -102,11 +102,11 @@ export class PokeUptimeService {
       let httpResponseStatus = stack[0];
       let httpResponseTime = stack[1];
 
-      console.log(`[poke-uptime] httpResponseStatus`,httpResponseStatus);
+      console.log(`[poke-uptime-service] httpResponseStatus`,httpResponseStatus);
 
       httpResponseStatus.map( (item) => {
         this.checks.forEach( (check, index) => {
-          console.log(`[poke-uptime] httpResponseStatus ${check.check_id}`);
+          console.log(`[poke-uptime-service] httpResponseStatus ${check.check_id}`);
 
           if (check.check_id == item.l.check_id) {
             this.checks[index].status  = item.v[0][item.v[0].length-1];
@@ -117,7 +117,7 @@ export class PokeUptimeService {
 
       httpResponseTime.map( (item) => {
         this.checks.forEach( (check, index) => {
-          console.log(`[poke-uptime] httpResponseTime ${check.check_id}`);
+          console.log(`[poke-uptime-service] httpResponseTime ${check.check_id}`);
 
           if (check.check_id == item.l.check_id) {
             this.checks[index].gts = item;
