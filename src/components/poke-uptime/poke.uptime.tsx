@@ -3,8 +3,6 @@ import { RouterHistory } from '@stencil/router';
 
 import { PokeService } from '../../utils/interfaces';
 
-
-
 @Component({
   tag: "poke-uptime",
   styleUrl: "poke-uptime.scss"

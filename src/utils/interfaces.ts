@@ -27,3 +27,19 @@ export interface Gts {
     },
     v: Array<Array<string | boolean | number>>
 }
+
+export interface c3Gts {
+    xs: {
+        [dynamic:string]: string,
+    },
+    types: {
+        [dynamic:string]: string,
+    },
+    names: {
+        [dynamic:string]: string,
+    },
+    colors: {
+        [dynamic:string]: string,
+    },
+    columns: Array<Array<string | boolean | number>>,
+}
