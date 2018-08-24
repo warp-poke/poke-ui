@@ -34,7 +34,7 @@ export interface Gts {
     v: Array<Array<string | boolean | number>>
 }
 
-export interface c3Gts {
+export interface C3Gts {
     xs: {
         [dynamic:string]: string,
     },

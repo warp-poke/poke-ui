@@ -42,6 +42,7 @@ declare global {
 
     interface PokeSignIn {
       'history': RouterHistory;
+      'pokeConf': PokeConf;
       'singinQuery': (event?: UIEvent) => void;
       'singupQuery': (event?: UIEvent) => void;
     }
@@ -142,6 +143,7 @@ declare global {
     export interface PokeSignInAttributes extends HTMLAttributes {
       'history'?: RouterHistory;
       'onSign-in-succesful'?: (event: CustomEvent) => void;
+      'pokeConf'?: PokeConf;
     }
 
     export interface PokeUiAttributes extends HTMLAttributes {

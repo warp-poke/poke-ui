@@ -1,13 +1,14 @@
 .poke-check {
     display: flex;
     flex-flow: row;
-    align-items: center;
+    align-items: top;
 
     &>div {
         padding: 0.4rem;
     }
 
 
+        
     .poke-check-status {
         font-size: 0.7rem;
         color: #ffffff;
@@ -30,10 +31,19 @@
 
     }
 
+
     .poke-check-description {
-        display: float;
-        flex-flow: column nowrap;
-        justify-content: space-around;
+        display: flex;
+        align-items: baseline;
+
+        .poke-check-dot {
+            width: 10px;
+            height: 10px;
+            margin-top: 4px;
+            margin-right: 16px;
+            border-radius: 5px;
+            background-color: #ff0066;
+        }
 
         .poke-check-name {
             font-weight: bold;
@@ -42,7 +52,10 @@
             text-overflow: ellipsis;
         }
         .poke-check-url {
-
+            margin-right: 16px;
+        }
+        .poke-check-type {
+            font-size: 0.8em;
         }
     }
 
