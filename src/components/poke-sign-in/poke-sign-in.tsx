@@ -1,6 +1,7 @@
 import { Component,  Event, EventEmitter, Method, Prop, State, Watch } from "@stencil/core";
 import { RouterHistory } from '@stencil/router';
 
+import { PokeConf } from '../../utils/interfaces';
 
 @Component({
   tag: "poke-sign-in",
@@ -9,6 +10,7 @@ import { RouterHistory } from '@stencil/router';
 export class PokeSignIn {
 
   @Prop() history: RouterHistory;
+  @Prop() pokeConf: PokeConf;
 
   @State() message: string = '';
   @State() signupEmail: string = '';
@@ -19,14 +21,24 @@ export class PokeSignIn {
 
   @State() signinDisabled: boolean = true;
   @State() signupDisabled: boolean = true;
+  @State() pokeApiEndpoint: string;
 
   @Event({eventName: 'sign-in-succesful'}) signinSuccesful: EventEmitter;
+
+
+  @Watch('pokeConf')
+  handleConf() {
+    console.log('[poke-uptime] handleConf', this.pokeConf);
+    this.pokeApiEndpoint = (this.pokeConf && this.pokeConf.pokeApiEndpoint) ?
+      this.pokeConf.pokeApiEndpoint :
+      'https://warp-poke-scheduler.cleverapps.io';
+  }
 
   @Method()
   singupQuery(event?: UIEvent) {
     console.log('Signing-up', event);
 
-    let url: string = `https://warp-poke-scheduler.cleverapps.io/register`;
+    let url: string = `${this.pokeApiEndpoint}/register`;
     let options: RequestInit = {
       headers: {
         'content-type': 'application/json'
@@ -57,7 +69,7 @@ export class PokeSignIn {
   singinQuery(event?: UIEvent) {
     console.log('Signing-in', event);
 
-    let url: string = `https://warp-poke-scheduler.cleverapps.io/login`;
+    let url: string = `${this.pokeApiEndpoint}/login`;
     let options: RequestInit = {
       headers: {
         'content-type': 'application/json'
