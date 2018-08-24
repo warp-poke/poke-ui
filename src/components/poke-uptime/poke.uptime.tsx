@@ -1,4 +1,4 @@
-import { Component, Method, Prop, State, Watch } from "@stencil/core";
+import { Component, Listen, Method, Prop, State, Watch } from "@stencil/core";
 import { RouterHistory } from '@stencil/router';
 
 import { PokeService, PokeConf } from '../../utils/interfaces';
@@ -19,6 +19,7 @@ export class PokeUptime {
   @State() services: Array<PokeService>;
   @State() warpEndpoint: string;
   @State() pokeApiEndpoint: string;
+  @State() filter: string;
 
 
   @Watch('pokeConf')
@@ -30,6 +31,23 @@ export class PokeUptime {
     this.pokeApiEndpoint = (this.pokeConf && this.pokeConf.pokeApiEndpoint) ?
       this.pokeConf.pokeApiEndpoint :
       'https://warp-poke-scheduler.cleverapps.io';
+  }
+
+
+  @Listen('filter-change')
+  onFilterChange(evt: CustomEvent) {
+    console.log('[poke-ui] onFilterChange', evt.detail);
+    this.filter = evt.detail.filter;
+  }
+
+  filterServices(): Array<PokeService> {
+    if (!this.filter) {
+      return this.services;
+    }
+    let pattern =  new RegExp(this.filter);
+    return this.services.filter((service:PokeService) => {
+      return ( !!service.domain && service.domain.match(pattern)) || (!!service.name && service.name.match(pattern));
+    })
   }
 
   componentWillUpdate() {
@@ -134,11 +152,27 @@ export class PokeUptime {
   }
 
   render() {
+    if (!this.services || this.services.length == 0) {
+      console.log('[poke-ui] rendering empty', this.services);
+      
+      return(
+        <div class="services"></div>
+      )
+    }
+    let filteredServices = this.filterServices();
+    if (!filteredServices ||  filteredServices.length == 0) {
+      console.log('[poke-ui] rendering empty', this.services, filteredServices);
+      return(
+        <div class="services"></div>
+      )
+    }
     return(
       <div class="services">
-        {
-          (this.services && this.services.length > 0) ? 
-          this.services.map( (service, index) =>
+        <div class="poke-check-filter">
+          <poke-check-filter></poke-check-filter>
+        </div>
+        {          
+          filteredServices.map( (service, index) =>
             index < 100 ?  
               <poke-uptime-service 
                   service={service} 
@@ -146,8 +180,7 @@ export class PokeUptime {
                   warpEndpoint={this.warpEndpoint}
                   debug></poke-uptime-service> 
             : ''
-          ) : 
-          '' 
+          ) 
         }
 
       </div>

@@ -36,6 +36,10 @@ declare global {
 
   namespace StencilComponents {
 
+    interface PokeCheckFilter {
+
+    }
+
     interface PokeLogo {
 
     }
@@ -73,6 +77,14 @@ declare global {
     }
   }
 
+
+    interface HTMLPokeCheckFilterElement extends StencilComponents.PokeCheckFilter, HTMLStencilElement {}
+
+    var HTMLPokeCheckFilterElement: {
+      prototype: HTMLPokeCheckFilterElement;
+      new (): HTMLPokeCheckFilterElement;
+    };
+    
 
     interface HTMLPokeLogoElement extends StencilComponents.PokeLogo, HTMLStencilElement {}
 
@@ -125,6 +137,7 @@ declare global {
   namespace JSX {
     interface Element {}
     export interface IntrinsicElements {
+    'poke-check-filter': JSXElements.PokeCheckFilterAttributes;
     'poke-logo': JSXElements.PokeLogoAttributes;
     'poke-sign-in': JSXElements.PokeSignInAttributes;
     'poke-ui': JSXElements.PokeUiAttributes;
@@ -135,6 +148,10 @@ declare global {
   }
 
   namespace JSXElements {
+
+    export interface PokeCheckFilterAttributes extends HTMLAttributes {
+      'onFilter-change'?: (event: CustomEvent) => void;
+    }
 
     export interface PokeLogoAttributes extends HTMLAttributes {
 
@@ -171,6 +188,7 @@ declare global {
   }
 
   interface HTMLElementTagNameMap {
+    'poke-check-filter': HTMLPokeCheckFilterElement
     'poke-logo': HTMLPokeLogoElement
     'poke-sign-in': HTMLPokeSignInElement
     'poke-ui': HTMLPokeUiElement
@@ -180,6 +198,7 @@ declare global {
   }
 
   interface ElementTagNameMap {
+    'poke-check-filter': HTMLPokeCheckFilterElement;
     'poke-logo': HTMLPokeLogoElement;
     'poke-sign-in': HTMLPokeSignInElement;
     'poke-ui': HTMLPokeUiElement;
