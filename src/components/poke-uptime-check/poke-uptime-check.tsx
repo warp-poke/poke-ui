@@ -24,7 +24,7 @@ export class PokeUptimeCheck {
     console.log(`[poke-uptime-check] render called`, this.zones);
     return(
       <div class="poke-check">
-        <div class="poke-check-description col-3 ">
+        <div class="poke-check-description col-2 ">
           <div class="poke-check-name">
             { this.check.name ? this.check.name : '' }
           </div>
@@ -37,7 +37,27 @@ export class PokeUptimeCheck {
           { this.check.secure ? 'HTTPS' : 'HTTP' }
         </div>  
 
-        <div class="poke-check-zones col-8">
+        <div class="poke-check-zones col-9">
+          {
+            Object.keys(this.zones).map(zone => 
+              <div class="poke-check-zone">
+                
+                <div class="poke-check-zone-name  col-2">
+                  {zone}
+                </div>
+                {
+                  this.zones[zone].status  
+                  ? (typeof this.zones[zone].status == 'string' && (this.zones[zone].status as string).match(/2..|up/)) ||
+                    (typeof this.zones[zone].status == 'number' &&
+                    (this.zones[zone].status as number) >= 200 &&
+                    (this.zones[zone].status as number) < 300 ) 
+                      ? <div class="poke-check-status up col-1">{this.zones[zone].status}</div> 
+                      : <div class="poke-check-status down col-1">{this.zones[zone].status}</div>
+                  : <div class="poke-check-status col-1">{this.zones[zone].status}</div>
+                }    
+              </div>
+            )
+          }
           { 
             Object.keys(this.zones).map(zone => {
               <div class="poke-check-zone">

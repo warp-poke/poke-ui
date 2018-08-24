@@ -51,6 +51,14 @@
         flex-flow: column nowrap;
     }
     
+    .poke-check-zone {
+        display: flex;
+        flex-flow: row;
+        align-items: center;
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+
     .poke-check-history {
       height: 100px;
     }
