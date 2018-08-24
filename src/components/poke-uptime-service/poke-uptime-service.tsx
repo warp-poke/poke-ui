@@ -20,6 +20,8 @@ export class PokeUptimeService {
 
     @State() checks: Array<PokeCheck> = [];
 
+    @State() instance: string;
+
 
     @Watch('service')
     getChecks() {
@@ -30,6 +32,9 @@ export class PokeUptimeService {
       if (this.debug) {
         console.log(`[poke-uptime-service] getChecks`, this.checks);
       }
+
+      this.getWarpscript();
+      this.queryServer();
     }
 
     @Watch('warp10Token')
@@ -98,9 +103,8 @@ export class PokeUptimeService {
     }
 
     componentDidLoad() {
+      this.instance = Math.random().toString(36).substring(7);
       this.getChecks();
-      this.getWarpscript();
-      this.queryServer();
     }
 
 
@@ -150,7 +154,6 @@ export class PokeUptimeService {
         });
       });
       this.checks = [ ...this.checks ];
-
     }
 
     render() {
