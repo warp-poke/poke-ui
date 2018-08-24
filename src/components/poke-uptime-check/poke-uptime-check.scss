@@ -46,6 +46,11 @@
         }
     }
 
+    .poke-check-zones {
+        display: flex;
+        flex-flow: column nowrap;
+    }
+    
     .poke-check-history {
       height: 100px;
     }

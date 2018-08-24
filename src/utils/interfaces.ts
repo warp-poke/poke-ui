@@ -1,11 +1,17 @@
+export interface PokeCheckResultByZone  {
+    status?: string | number | boolean,
+    gts?: Gts,
+}
+
 export interface PokeCheck {
     check_id: string,
     service_id: string,
     name?: string,
     secure: boolean,
     path: string,
-    status?: string | number | boolean,
-    gts?: Gts,
+    zones: { 
+        [dynamic:string] : PokeCheckResultByZone
+    },
 }
 
 

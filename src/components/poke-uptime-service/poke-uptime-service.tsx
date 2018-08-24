@@ -111,19 +111,22 @@ export class PokeUptimeService {
       let httpResponseStatus = stack[0];
       let httpResponseTime = stack[1];
 
-      if (this.debug) {
-        console.log(`[poke-uptime-service] httpResponseStatus`,httpResponseStatus);
-      }
-
       httpResponseStatus.map( (item) => {
         this.checks.forEach( (check, index) => {
           if (this.debug) {
             console.log(`[poke-uptime-service] httpResponseStatus ${check.check_id}`);
           }
           if (check.check_id == item.l.check_id) {
-            this.checks[index].status  = item.v[0][item.v[0].length-1];
+            let zone = item.l.zone || '';
+            if (!this.checks[index].zones) {
+              this.checks[index].zones = {};
+            } 
+            if (!this.checks[index].zones[zone]) {
+              this.checks[index].zones[zone] = {};
+            }
+            this.checks[index].zones[zone].status  = item.v[0][item.v[0].length-1];
             if (this.debug) {
-              console.log(`[poke-uptime-service] httpResponseStatus ${item.v[0][item.v[0].length-1]} for service ${check.service_id} and check ${check.check_id}`, this.checks[index]);
+              console.log(`[poke-uptime-service] httpResponseStatus ${item.v[0][item.v[0].length-1]} for service ${check.service_id}, zone ${zone} and check ${check.check_id}`, this.checks[index]);
             }
           }
         });
@@ -135,7 +138,14 @@ export class PokeUptimeService {
             console.log(`[poke-uptime-service] httpResponseTime ${check.check_id}`);
           }
           if (check.check_id == item.l.check_id) {
-            this.checks[index].gts = item;
+            let zone = item.l.zone || '';
+            if (!this.checks[index].zones) {
+              this.checks[index].zones = {};
+            }
+            if (!this.checks[index].zones[zone]) {
+              this.checks[index].zones[zone] = {};
+            }
+            this.checks[index].zones[zone].gts = item;
           }
         });
       });
@@ -153,9 +163,8 @@ export class PokeUptimeService {
               this.checks.map( (check) =>
                 <poke-uptime-check
                     domain={this.service.domain}
-                    status={check.status}
+                    zones={check.zones}
                     check={check}
-                    gts={check.gts}
                     warp10-token={this.warp10Token}></poke-uptime-check>
               )
             }
