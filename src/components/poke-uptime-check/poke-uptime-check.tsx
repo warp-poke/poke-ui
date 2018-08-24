@@ -4,7 +4,7 @@ import { PokeCheck, Gts, c3Gts } from '../../utils/interfaces';
 
 import timeseriesTools from '@photon-elements/photon-tools/photon-timeseries-tools';
 
-import '@granite-elements/granite-c3/granite-c3';
+import '@granite-elements/granite-c3/granite-c3-without-importmeta';
 
 
 @Component({
