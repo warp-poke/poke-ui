@@ -10,8 +10,9 @@
     "dist/"
   ],
   "scripts": {
-    "build": "stencil build --prerender",
+    "build": "stencil build",
     "start": "stencil build --dev --watch --serve",
+    "serve": "npm run build ; node server.js",
     "test": "jest",
     "test.watch": "jest --watch"
   },
