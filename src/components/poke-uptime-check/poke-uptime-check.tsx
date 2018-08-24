@@ -96,7 +96,7 @@ export class PokeUptimeCheck {
                     fit: true,
                     count: 2,
                     format: (y) => {
-                      let value = y.toFixed(5);
+                      let value = y.toFixed(2);
                       let splittedValue = value.split('.');
                       let formattedIntPart = splittedValue[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
                       let formattedDecimalPart = splittedValue[1].replace(/0+$/g, '');

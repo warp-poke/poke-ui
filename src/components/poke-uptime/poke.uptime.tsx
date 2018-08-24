@@ -1,7 +1,7 @@
-import { Component, Method, Prop, State } from "@stencil/core";
+import { Component, Method, Prop, State, Watch } from "@stencil/core";
 import { RouterHistory } from '@stencil/router';
 
-import { PokeService } from '../../utils/interfaces';
+import { PokeService, PokeConf } from '../../utils/interfaces';
 
 @Component({
   tag: "poke-uptime",
@@ -10,11 +10,27 @@ import { PokeService } from '../../utils/interfaces';
 export class PokeUptime {
 
   @Prop() history: RouterHistory;
+  @Prop() pokeConf: PokeConf;
+  @Prop() debug: boolean;
 
   @State() authToken: string = window.localStorage && window.localStorage.getItem('authToken'); 
   @State() warp10Token: string;
   @State() loading: boolean = false;
   @State() services: Array<PokeService>;
+  @State() warpEndpoint: string;
+  @State() pokeApiEndpoint: string;
+
+
+  @Watch('pokeConf')
+  handleConf() {
+    console.log('[poke-uptime] handleConf', this.pokeConf);
+    this.warpEndpoint = (this.pokeConf && this.pokeConf.warpEndpoint) ? 
+        this.pokeConf.warpEndpoint : 
+        `https://gra1-poke.metrics.ovh.net/api/v0`;
+    this.pokeApiEndpoint = (this.pokeConf && this.pokeConf.pokeApiEndpoint) ?
+      this.pokeConf.pokeApiEndpoint :
+      'https://warp-poke-scheduler.cleverapps.io';
+  }
 
   componentWillUpdate() {
     console.log('[poke-uptime] componentWillUpdate', this.services);
@@ -39,6 +55,9 @@ export class PokeUptime {
       this.history.push(`/signin`, {});
       return;
     }
+    if (!this.warpEndpoint || !this.pokeApiEndpoint) {
+      this.handleConf();
+    }
     if (!this.warp10Token) {
       this.loadWarp10Token();
     }
@@ -49,7 +68,7 @@ export class PokeUptime {
 
   @Method()
   loadWarp10Token() {
-    let url: string = `https://warp-poke-scheduler.cleverapps.io/token`;
+    let url: string = `${this.pokeApiEndpoint}/token`;
     let options: RequestInit = {
       headers: {
         'content-type': 'application/json',
@@ -80,7 +99,7 @@ export class PokeUptime {
 
   @Method()
   loadServices() {
-    let url: string = `https://warp-poke-scheduler.cleverapps.io/services`;
+    let url: string = `${this.pokeApiEndpoint}/services`;
     let options: RequestInit = {
       headers: {
         'content-type': 'application/json',
@@ -121,7 +140,10 @@ export class PokeUptime {
           (this.services && this.services.length > 0) ? 
           this.services.map( (service, index) =>
             index < 100 ?  
-              <poke-uptime-service service={service} warp10Token={this.warp10Token}></poke-uptime-service> 
+              <poke-uptime-service 
+                  service={service} 
+                  warp10Token={this.warp10Token} 
+                  warpEndpoint={this.warpEndpoint}></poke-uptime-service> 
             : ''
           ) : 
           '' 

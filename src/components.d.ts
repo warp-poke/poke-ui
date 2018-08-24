@@ -16,6 +16,7 @@ import {
 import {
   Gts,
   PokeCheck,
+  PokeConf,
   PokeService,
 } from './utils/interfaces';
 
@@ -57,14 +58,18 @@ declare global {
     }
 
     interface PokeUptimeService {
+      'debug': boolean;
       'service': PokeService;
       'warp10Token': string;
+      'warpEndpoint': string;
     }
 
     interface PokeUptime {
+      'debug': boolean;
       'history': RouterHistory;
       'loadServices': () => void;
       'loadWarp10Token': () => void;
+      'pokeConf': PokeConf;
     }
   }
 
@@ -152,12 +157,16 @@ declare global {
     }
 
     export interface PokeUptimeServiceAttributes extends HTMLAttributes {
+      'debug'?: boolean;
       'service'?: PokeService;
       'warp10Token'?: string;
+      'warpEndpoint'?: string;
     }
 
     export interface PokeUptimeAttributes extends HTMLAttributes {
+      'debug'?: boolean;
       'history'?: RouterHistory;
+      'pokeConf'?: PokeConf;
     }
   }
 

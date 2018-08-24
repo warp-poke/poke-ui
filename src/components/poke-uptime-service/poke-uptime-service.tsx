@@ -9,15 +9,17 @@ import { PokeService, Gts, PokeCheck } from '../../utils/interfaces';
 })
 export class PokeUptimeService {
 
+    @Prop() warpEndpoint: string;
     @Prop() service: PokeService;
     @Prop() warp10Token: string;
+    @Prop() debug: boolean;
 
     @State() warpscript: string;
 
-    @State() url: string = `https://gra1-poke.metrics.ovh.net/api/v0/exec`;
     @State() options: RequestInit;
 
     @State() checks: Array<PokeCheck> = [];
+
 
     @Watch('service')
     getChecks() {
@@ -25,12 +27,16 @@ export class PokeUptimeService {
         return;
       }
       this.checks = [ ...this.service.checks ];
-      console.log(`[poke-uptime-service] getChecks`, this.checks);
+      if (this.debug) {
+        console.log(`[poke-uptime-service] getChecks`, this.checks);
+      }
     }
 
     @Watch('warp10Token')
     getWarpscript() {
-      console.log('[poke-uptime-service] getWarpscript', this.warpscript);
+      if (this.debug) {
+        console.log('[poke-uptime-service] getWarpscript', this.warpscript);
+      }
       this.warpscript = `
         [
           '${this.warp10Token}'
@@ -59,7 +65,9 @@ export class PokeUptimeService {
 
     @Watch('warpscript')
     prepareQuery() {
-      console.log('[poke-uptime-service] prepareQuery', this.warpscript);
+      if (this.debug) {
+        console.log('[poke-uptime-service] prepareQuery', this.warpscript);
+      }
       this.options = {
         headers: {},
         mode: 'cors',
@@ -71,13 +79,15 @@ export class PokeUptimeService {
 
     queryServer() {
       if (this.warpscript) {
-        fetch(this.url, this.options).then( response => {
+        fetch(`${this.warpEndpoint}/exec`, this.options).then( response => {
           if (!response.ok) {
             throw new Error(`Response: ${response.status} - ${response.statusText}`);
           }
           return response.json();
         }).then( (data) => {
-          console.log('[poke-uptime-service] queryServer - Got Warp 10 response', data);
+          if (this.debug) {
+            console.log('[poke-uptime-service] queryServer - Got Warp 10 response', data);
+          }
           this.gotResponse(data);
         }).catch( (error) => {
           console.error('[poke-uptime-service] queryServer - There has been a problem with your fetch operation:',
@@ -91,7 +101,6 @@ export class PokeUptimeService {
       this.getChecks();
       this.getWarpscript();
       this.queryServer();
-
     }
 
 
@@ -102,23 +111,29 @@ export class PokeUptimeService {
       let httpResponseStatus = stack[0];
       let httpResponseTime = stack[1];
 
-      console.log(`[poke-uptime-service] httpResponseStatus`,httpResponseStatus);
+      if (this.debug) {
+        console.log(`[poke-uptime-service] httpResponseStatus`,httpResponseStatus);
+      }
 
       httpResponseStatus.map( (item) => {
         this.checks.forEach( (check, index) => {
-          console.log(`[poke-uptime-service] httpResponseStatus ${check.check_id}`);
-
+          if (this.debug) {
+            console.log(`[poke-uptime-service] httpResponseStatus ${check.check_id}`);
+          }
           if (check.check_id == item.l.check_id) {
             this.checks[index].status  = item.v[0][item.v[0].length-1];
-            console.log(`[poke-uptime-service] httpResponseStatus ${item.v[0][item.v[0].length-1]} for service ${check.service_id} and check ${check.check_id}`, this.checks[index]);
+            if (this.debug) {
+              console.log(`[poke-uptime-service] httpResponseStatus ${item.v[0][item.v[0].length-1]} for service ${check.service_id} and check ${check.check_id}`, this.checks[index]);
+            }
           }
         });
       });
 
       httpResponseTime.map( (item) => {
         this.checks.forEach( (check, index) => {
-          console.log(`[poke-uptime-service] httpResponseTime ${check.check_id}`);
-
+          if (this.debug) {
+            console.log(`[poke-uptime-service] httpResponseTime ${check.check_id}`);
+          }
           if (check.check_id == item.l.check_id) {
             this.checks[index].gts = item;
           }

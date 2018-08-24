@@ -43,3 +43,8 @@ export interface c3Gts {
     },
     columns: Array<Array<string | boolean | number>>,
 }
+
+export interface PokeConf {
+    warpEndpoint: string;
+    pokeApiEndpoint: string;
+}
