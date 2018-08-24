@@ -37,7 +37,7 @@ declare global {
   namespace StencilComponents {
 
     interface PokeCheckFilter {
-
+      'filter': string;
     }
 
     interface PokeLogo {
@@ -150,6 +150,7 @@ declare global {
   namespace JSXElements {
 
     export interface PokeCheckFilterAttributes extends HTMLAttributes {
+      'filter'?: string;
       'onFilter-change'?: (event: CustomEvent) => void;
     }
 

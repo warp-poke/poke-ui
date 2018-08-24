@@ -99,65 +99,49 @@ export class PokeUptimeCheck {
           </div>        
         </div>
 
+        { 
+          this.zones 
+          ?
+          <div class="poke-check-zones col-9">
+            {
+              Object.keys(this.zones).map(zone => 
+                <div class="poke-check-zone">
+                  
+                  <div class="poke-check-zone-name  col-2">
+                    {zone}
+                  </div>
+                  {
+                    this.zones[zone].status  
+                    ? (typeof this.zones[zone].status == 'string' && (this.zones[zone].status as string).match(/2..|up/)) ||
+                      (typeof this.zones[zone].status == 'number' &&
+                      (this.zones[zone].status as number) >= 200 &&
+                      (this.zones[zone].status as number) < 300 ) 
+                        ? <div class="poke-check-status up col-1">{this.zones[zone].status}</div> 
+                        : <div class="poke-check-status down col-1">{this.zones[zone].status}</div>
+                    : <div class="poke-check-status col-1">{this.zones[zone].status}</div>
+                  }    
 
-        <div class="poke-check-zones col-9">
-          {
-            Object.keys(this.zones).map(zone => 
-              <div class="poke-check-zone">
-                
-                <div class="poke-check-zone-name  col-2">
-                  {zone}
+                  <div class="poke-check-history col-9">
+                    { 
+                      this.zones[zone].gts 
+                      ? 
+                        <granite-c3 
+                            data={ this.convertToC3Data(this.zones[zone].gts) }
+                            axis={ this._axis() }
+                            point={ this._point() }
+                            options={ this._options() }
+                            legend={{show: false}}
+                            tooltip={{show: false}}
+                            debug></granite-c3>
+                      :''
+                    }
+                  </div>
                 </div>
-                {
-                  this.zones[zone].status  
-                  ? (typeof this.zones[zone].status == 'string' && (this.zones[zone].status as string).match(/2..|up/)) ||
-                    (typeof this.zones[zone].status == 'number' &&
-                    (this.zones[zone].status as number) >= 200 &&
-                    (this.zones[zone].status as number) < 300 ) 
-                      ? <div class="poke-check-status up col-1">{this.zones[zone].status}</div> 
-                      : <div class="poke-check-status down col-1">{this.zones[zone].status}</div>
-                  : <div class="poke-check-status col-1">{this.zones[zone].status}</div>
-                }    
-
-                <div class="poke-check-history col-9">
-                  { 
-                    this.zones[zone].gts 
-                    ? 
-                      <granite-c3 
-                          data={ this.convertToC3Data(this.zones[zone].gts) }
-                          axis={ this._axis() }
-                          point={ this._point() }
-                          options={ this._options() }
-                          legend={{show: false}}
-                          tooltip={{show: false}}
-                          debug></granite-c3>
-                    :''
-                  }
-                </div>
-              </div>
-            )
-          }
-          { 
-            Object.keys(this.zones).map(zone => {
-              <div class="poke-check-zone">  
-                <div class="poke-check-history col-6">
-                  { 
-                    this.zones[zone].gts ? 
-                    <granite-c3 
-                    data={ this.convertToC3Data(this.zones[zone].gts) }
-                    axis={ this._axis() }
-                    point={ this._point() }
-                    options={ this._options() }
-                    legend={{show: false}}
-                    tooltip={{show: false}}
-                    debug></granite-c3>
-                    : <div></div>
-                  }
-                </div>  
-              </div>
-            })
-          }
-        </div>
+              )
+            }
+          </div>
+          : '' 
+        }
       </div>
     );
   }

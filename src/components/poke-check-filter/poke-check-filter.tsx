@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter } from "@stencil/core";
+import { Component, Element, Event, EventEmitter, Prop, State, Watch } from "@stencil/core";
 
 @Component({
   tag: "poke-check-filter",
@@ -6,7 +6,17 @@ import { Component, Event, EventEmitter } from "@stencil/core";
 })
 export class PokeCheckFilter {
 
+  @Element() el: HTMLElement;
 
+  @State() value: string = '';
+
+  @Prop()
+  filter: string;
+
+  @Watch('filter')
+  onFilterChange() {
+    this.value = this.filter
+  }
 
   @Event({eventName: 'filter-change'}) filterChangeEmitter: EventEmitter;
 
@@ -17,6 +27,15 @@ export class PokeCheckFilter {
     this.filterChangeEmitter.emit({filter:value});
   }
 
+  componentDidLoad() {
+    if (this.value != this.filter) {
+      this.value = this.filter;
+    }
+    this.el.focus();
+    this.el.querySelector('input').focus();
+    console.log(this.el.querySelector('input'))
+  }
+
   render() {
     return (
       <form class="search">
@@ -25,6 +44,7 @@ export class PokeCheckFilter {
               class="form-input"
               type="text"
               placeholder="filter..."
+              value={this.value}
               onInput={(event) => this.handleChange(event)} />
         </div>
       </form>

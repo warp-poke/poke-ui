@@ -38,6 +38,7 @@ export class PokeUptime {
   onFilterChange(evt: CustomEvent) {
     console.log('[poke-ui] onFilterChange', evt.detail);
     this.filter = evt.detail.filter;
+    this.saveFilter();
   }
 
   filterServices(): Array<PokeService> {
@@ -50,6 +51,15 @@ export class PokeUptime {
     })
   }
 
+
+  saveFilter() {    
+    localStorage.setItem('poke.preferences.filter', this.filter);
+  }
+
+  restoreFilter() {
+    this.filter = localStorage.getItem('poke.preferences.filter');
+  }
+
   componentWillUpdate() {
     console.log('[poke-uptime] componentWillUpdate', this.services);
   }
@@ -59,6 +69,7 @@ export class PokeUptime {
   }
   componentWillLoad() {
     console.log('[poke-uptime] componentWillLoad', this.services);
+    this.restoreFilter();
   }
   componentDidUnload() {
     console.log('[poke-uptime] componentDidUnload', this.services);
@@ -163,13 +174,19 @@ export class PokeUptime {
     if (!filteredServices ||  filteredServices.length == 0) {
       console.log('[poke-ui] rendering empty', this.services, filteredServices);
       return(
-        <div class="services"></div>
+        <div class="services">
+          <div class="poke-check-filter">
+            <poke-check-filter 
+                filter={this.filter}></poke-check-filter>
+          </div>
+        </div>
       )
     }
     return(
       <div class="services">
         <div class="poke-check-filter">
-          <poke-check-filter></poke-check-filter>
+          <poke-check-filter 
+              filter={this.filter}></poke-check-filter>
         </div>
         {          
           filteredServices.map( (service, index) =>
