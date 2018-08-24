@@ -28,7 +28,7 @@ export class PokeSignIn {
 
   @Watch('pokeConf')
   handleConf() {
-    console.log('[poke-uptime] handleConf', this.pokeConf);
+    console.log('[poke-signin] handleConf', this.pokeConf);
     this.pokeApiEndpoint = (this.pokeConf && this.pokeConf.pokeApiEndpoint) ?
       this.pokeConf.pokeApiEndpoint :
       'https://warp-poke-scheduler.cleverapps.io';
@@ -99,6 +99,12 @@ export class PokeSignIn {
     });
   }
 
+  componentDidLoad() {
+    console.log('[poke-signin] componentDidUpdate ');
+    if ( !this.pokeApiEndpoint) {
+      this.handleConf();
+    }
+  }  
 
   gotSignUpSuccesful() {
     console.log("[forge-search] gotSignUpSuccesful");
