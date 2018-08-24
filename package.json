@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "stencil build",
-    "start": "stencil build --dev --watch --serve",
+    "dev": "stencil build --dev --watch --serve",
+    "start": "npm run build ; node server.js",
     "serve": "npm run build ; node server.js",
     "test": "jest",
     "test.watch": "jest --watch"
@@ -56,5 +57,5 @@
       "jsx"
     ]
   },
-  "version": "0.4.1"
+  "version": "0.4.2"
 }
