@@ -1,0 +1,4 @@
+{
+    "warpEndpoint":"https://gra1-poke.metrics.ovh.net/api/v0/exec",
+    "pokeApiEndpoint":"https://warp-poke-scheduler.cleverapps.io"
+}

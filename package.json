@@ -1,0 +1,50 @@
+{
+  "name": "poke-ui",
+  "version": "2.0.0",
+  "description": "An UI for Warp Poke",
+  "author": "Horacio Gonzalez <horacio.gonzalez@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/warp-poke/poke-ui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/warp-poke/poke-ui"
+  },
+  "homepage": "https://github.com/warp-poke/poke-ui",
+  "scripts": {
+    "postinstall": "node scripts/change-base-color.js ; cd node_modules/spectre.css ; npm i ; npx gulp build; cd ../../ ; node ./scripts/granite-css-modularizer.js ./node_modules/spectre.css/dist ./src/css/",
+    "start": "polymer serve",
+    "build": "polymer build",
+    "lint": "polymer lint",
+    "test": "polymer test",
+    "test:integration": "polymer build # test that psk builds without error with the CLI"
+  },
+  "dependencies": {
+    "@granite-elements/granite-c3": "^3.2.0",
+    "@granite-elements/granite-lit-spectre": "^0.5.7-0",
+    "@granite-elements/granite-yaml": "^2.0.1",
+    "@photon-elements/photon-ide-elements": "^1.2.1",
+    "@polymer/app-layout": "^3.0.0-pre.15",
+    "@polymer/app-route": "^3.0.0-pre.15",
+    "@polymer/iron-flex-layout": "^3.0.0-pre.15",
+    "@polymer/iron-iconset-svg": "^3.0.0-pre.15",
+    "@polymer/iron-media-query": "^3.0.0-pre.15",
+    "@polymer/iron-pages": "^3.0.0-pre.15",
+    "@polymer/iron-selector": "^3.0.0-pre.15",
+    "@polymer/lit-element": "^0.6.4",
+    "@polymer/paper-icon-button": "^3.0.0-pre.15",
+    "@polymer/polymer": "^3.0.0",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "spectre.css": "^0.5.7"
+  },
+  "devDependencies": {
+    "fs-extra": "^7.0.1",
+    "klaw": "^3.0.0",
+    "polymer-cli": "^1.7.1",
+    "wct-browser-legacy": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=8.0"
+  }
+}
