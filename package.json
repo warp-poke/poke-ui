@@ -14,8 +14,8 @@
   "homepage": "https://github.com/warp-poke/poke-ui",
   "scripts": {
     "postinstall": "node scripts/change-base-color.js ; cd node_modules/spectre.css ; npm i ; npx gulp build; cd ../../ ; node ./scripts/granite-css-modularizer.js ./node_modules/spectre.css/dist ./src/css/",
-    "start": "polymer serve",
-    "build": "polymer build",
+    "start": "npx polymer build ; node server.js",
+    "serve": "npx polymer build ; node server.js",
     "lint": "polymer lint",
     "test": "polymer test",
     "test:integration": "polymer build # test that psk builds without error with the CLI"
@@ -36,6 +36,7 @@
     "@polymer/paper-icon-button": "^3.0.0-pre.15",
     "@polymer/polymer": "^3.0.0",
     "@webcomponents/webcomponentsjs": "^2.0.0",
+    "node-static": "^0.7.11",
     "spectre.css": "^0.5.7"
   },
   "devDependencies": {
