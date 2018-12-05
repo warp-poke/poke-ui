@@ -1,5 +1,6 @@
 import { LitElement, html } from '@polymer/lit-element';
 import spectreCSS from './css/granite-lit-spectre-min';
+import spectreCSSIcons from './css/granite-lit-spectre-icons-min';
 
 import './poke-uptime-check';
 
@@ -153,41 +154,63 @@ class PokeUptimeService extends LitElement {
     this.checks = [ ...this.checks ];
   }
 
+  editService() {
+    console.log('[poke-uptime-service] editService');
+  }
 
   render() {
     return html`
       ${spectreCSS}
+      ${spectreCSSIcons}
       <style>
         :host {
           display: block;
           padding: 1rem !important;
         }
-        .poke-service {
+        .poke-service-container {
           background: #fff;
           border: .05rem solid #e7e9ed;
           border-radius: .1rem;
           margin: .8rem;
           padding: .8rem;
+        }
+        .poke-service {
           display: flex;
           flex-flow: column;
         }
         .poke-service-domain {
           align-self: flex-start;
         }
+        .fab {
+          float:right;
+        }
+        .btn-fab {
+          width: 40px !important;
+          height: 32px !important;
+        }
       </style>
-      <div class="poke-service">
-        <h5 class="poke-service-domain">${this.service.domain}</h5>
-        <div class="poke-checks">
-          ${
-            this.checks.map( (check) => html`
-              <poke-uptime-check
-                  domain='${this.service.domain}'
-                  .zones='${check.zones}'
-                  .check='${check}'
-                  warp10Token='${this.warp10Token}'
-                  ?debug='${this.debug}'></poke-uptime-check>
-            `)
-          }
+      <div class="poke-service-container">
+        <div class="fab">
+          <button 
+              class="btn btn-action btn-lg s-circle btn-fab"
+              @click="${this.editService}">
+            <i class="icon icon-edit"></i>
+          </button>
+        </div>
+        <div class="poke-service">
+          <h5 class="poke-service-domain">${this.service.domain}</h5>
+          <div class="poke-checks">
+            ${
+              this.checks.map( (check) => html`
+                <poke-uptime-check
+                    domain='${this.service.domain}'
+                    .zones='${check.zones}'
+                    .check='${check}'
+                    warp10Token='${this.warp10Token}'
+                    ?debug='${this.debug}'></poke-uptime-check>
+              `)
+            }
+          </div>
         </div>
       </div>
     `;    

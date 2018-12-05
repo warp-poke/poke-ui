@@ -1,5 +1,6 @@
 import { LitElement, html } from '@polymer/lit-element';
 import spectreCSS from './css/granite-lit-spectre-min';
+import spectreCSSIcons from './css/granite-lit-spectre-icons-min';
 
 import './poke-check-filter';
 import './poke-uptime-service';
@@ -154,6 +155,10 @@ class PokeUptime extends LitElement {
     localStorage.setItem('poke.preferences.filter', this.filter);
   }
 
+  addService() {
+    console.log('[poke-uptime] addService');
+  }
+
   render() {
     if (this.active != this.name) {
       return '';
@@ -166,6 +171,7 @@ class PokeUptime extends LitElement {
       console.log('[poke-ui] rendering empty', this.services);  
       return html`
         ${spectreCSS}
+        ${spectreCSSIcons}
         <style>
           :host {
             display: block;
@@ -175,13 +181,31 @@ class PokeUptime extends LitElement {
             display: flex;
             justify-content: center;
           }
+          .fab {
+            float:right;
+            margin: .8rem;
+          }
+          .btn-fab {
+            width: 40px !important;
+            height: 32px !important;
+          }
         </style>
+
+        <div class="fab">
+          <button 
+              class="btn btn-primary btn-action btn-lg s-circle btn-fab"
+              @click="${this.addService}">
+            <i class="icon icon-plus"></i>
+          </button>
+        </div>
         <div class="services"><h2>No services found...</h2></div>
+
       `;
     }
 
     return html`
       ${spectreCSS}
+      ${spectreCSSIcons}
       <style>
         :host {
           display: block;
@@ -190,9 +214,24 @@ class PokeUptime extends LitElement {
         .poke-check-filter {
           margin: .8rem;
         }
+        .fab {
+          float:right;
+          margin: .8rem;
+        }
+        .btn-fab {
+          width: 40px !important;
+          height: 32px !important;
+        }
       </style>
       
       <div class="services">
+        <div class="fab">
+          <button 
+              class="btn btn-primary btn-action btn-lg s-circle btn-fab"
+              @click="${this.addService}">
+            <i class="icon icon-plus"></i>
+          </button>
+        </div>
         <div class="poke-check-filter">
           <poke-check-filter 
               filter='${this.filter}'

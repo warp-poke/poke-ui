@@ -105,7 +105,7 @@ class PokeUptimeCheck extends LitElement {
         ${ 
           this.zones 
           ? html`
-            <div class="poke-check-zones col-9">
+            <div class="poke-check-zones col-10">
               ${Object.keys(this.zones).map(zone => this.renderZone(zone))}
             </div>
           `
