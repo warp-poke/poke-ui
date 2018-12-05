@@ -117,6 +117,7 @@ class PokeUi extends PolymerElement {
                 name="uptime"
                 active="[[page]]"
                 conf="[[conf]]"
+                filter="[[subrouteItem]]"
                 on-token-not-found="onTokenNotFound"></poke-uptime>
             <poke-auth 
                 name="auth" 
@@ -147,7 +148,8 @@ class PokeUi extends PolymerElement {
 
   static get observers() {
     return [
-      '_routePageChanged(routeData.page)'
+      '_routePageChanged(routeData.page)',
+      '_subroutePathChanged(subroute.path)'
     ];
   }
 
@@ -168,6 +170,11 @@ class PokeUi extends PolymerElement {
     if (!this.$.drawer.persistent) {
       this.$.drawer.close();
     }
+  }
+
+  _subroutePathChanged() {
+    console.log('[poke-ui] _subroutePathChanged', this.subroute.path);
+    this.subrouteItem = this.subroute.path.substring(1);
   }
 
   _pageChanged(page) {

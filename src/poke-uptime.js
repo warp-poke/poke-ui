@@ -1,11 +1,15 @@
 import { LitElement, html } from '@polymer/lit-element';
 import spectreCSS from './css/granite-lit-spectre-min';
 
+import './poke-check-filter';
+import './poke-uptime-service';
+
 class PokeUptime extends LitElement {
 
   constructor() {
     super();
     this.warpEndpoint = `https://gra1-poke.metrics.ovh.net/api/v0`;
+    this.filter = '';
   }
 
   set conf(conf) {
@@ -22,6 +26,7 @@ class PokeUptime extends LitElement {
       active: { type: String },
       name: { type: String },
       services: { type: Array },
+      filter: { type: String },
       conf: {type: Object},
     };
   }
@@ -124,9 +129,12 @@ class PokeUptime extends LitElement {
   }
 
   filterServices() {
+    if (!this.services) {
+      return [];
+    }
     if (!this.filter) {
       return this.services;
-    }
+    } 
     let pattern =  new RegExp(this.filter);
     return this.services.filter((service) => {
       return ( !!service.domain && service.domain.match(pattern)) 
@@ -135,6 +143,16 @@ class PokeUptime extends LitElement {
   }
 
 
+  onFilterChange(evt) {
+    console.log('[poke-ui] onFilterChange', evt);
+    this.filter = evt.detail.filter;
+    this.saveFilter();
+  }
+
+  saveFilter() {    
+    location.hash = `/${this.name}/${this.filter}`;
+    localStorage.setItem('poke.preferences.filter', this.filter);
+  }
 
   render() {
     if (this.active != this.name) {
@@ -142,6 +160,7 @@ class PokeUptime extends LitElement {
     }
 
     let filteredServices = this.filterServices();
+    console.log('[poke-ui] render - filteredServices', filteredServices);
 
     if (!this.services || this.services.length == 0) {
       console.log('[poke-ui] rendering empty', this.services);  
@@ -168,12 +187,16 @@ class PokeUptime extends LitElement {
           display: block;
           padding: 1rem !important;
         }
+        .poke-check-filter {
+          margin: .8rem;
+        }
       </style>
       
       <div class="services">
         <div class="poke-check-filter">
           <poke-check-filter 
-              filter={this.filter}></poke-check-filter>
+              filter='${this.filter}'
+              @filter-change='${this.onFilterChange}'></poke-check-filter>
         </div>
       </div>
       ${filteredServices.map( (service, index) =>
@@ -182,7 +205,8 @@ class PokeUptime extends LitElement {
             <poke-uptime-service 
               .service='${service}' 
               warp10Token='${this.warp10Token}' 
-              warpEndpoint='${this.warpEndpoint}'></poke-uptime-service>
+              warpEndpoint='${this.warpEndpoint}'
+              debug></poke-uptime-service>
           `
         : ''
       )}

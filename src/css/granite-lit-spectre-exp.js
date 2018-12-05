@@ -71,7 +71,7 @@ const styles = html`
 }
 
 .calendar {
-  border: .05rem solid #dadee4;
+  border: .05rem solid #ffcde1;
   border-radius: .1rem;
   display: block;
   min-width: 280px;
@@ -79,7 +79,7 @@ const styles = html`
 
 .calendar .calendar-nav {
   align-items: center;
-  background: #f7f8f9;
+  background: white;
   border-top-left-radius: .1rem;
   border-top-right-radius: .1rem;
   display: flex;
@@ -108,15 +108,15 @@ const styles = html`
 }
 
 .calendar .calendar-header {
-  background: #f7f8f9;
-  border-bottom: .05rem solid #dadee4;
-  color: #bcc3ce;
+  background: white;
+  border-bottom: .05rem solid #ffcde1;
+  color: #ff9ac2;
   font-size: .7rem;
   text-align: center;
 }
 
 .calendar .calendar-body {
-  color: #66758c;
+  color: #ff0166;
 }
 
 .calendar .calendar-date {
@@ -131,7 +131,7 @@ const styles = html`
   background: transparent;
   border: .05rem solid transparent;
   border-radius: 50%;
-  color: #66758c;
+  color: #ff0166;
   cursor: pointer;
   font-size: .7rem;
   height: 1.4rem;
@@ -233,8 +233,8 @@ const styles = html`
 }
 
 .calendar.calendar-lg .calendar-body .calendar-date {
-  border-bottom: .05rem solid #dadee4;
-  border-right: .05rem solid #dadee4;
+  border-bottom: .05rem solid #ffcde1;
+  border-right: .05rem solid #ffcde1;
   display: flex;
   display: -ms-flexbox;
   -ms-flex-direction: column;
@@ -312,11 +312,11 @@ const styles = html`
 .carousel .carousel-locator:nth-of-type(6):checked ~ .carousel-nav .nav-item:nth-of-type(6),
 .carousel .carousel-locator:nth-of-type(7):checked ~ .carousel-nav .nav-item:nth-of-type(7),
 .carousel .carousel-locator:nth-of-type(8):checked ~ .carousel-nav .nav-item:nth-of-type(8) {
-  color: #f7f8f9;
+  color: white;
 }
 
 .carousel {
-  background: #f7f8f9;
+  background: white;
   display: block;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
@@ -355,9 +355,9 @@ const styles = html`
 
 .carousel .carousel-container .item-prev,
 .carousel .carousel-container .item-next {
-  background: rgba(247, 248, 249, .25);
-  border-color: rgba(247, 248, 249, .5);
-  color: #f7f8f9;
+  background: rgba(255, 255, 255, .25);
+  border-color: rgba(255, 255, 255, .5);
+  color: white;
   opacity: 0;
   position: absolute;
   top: 50%;
@@ -388,7 +388,7 @@ const styles = html`
 }
 
 .carousel .carousel-nav .nav-item {
-  color: rgba(247, 248, 249, .5);
+  color: rgba(255, 255, 255, .5);
   display: block;
   -ms-flex: 1 0 auto;
   flex: 1 0 auto;
@@ -517,7 +517,7 @@ const styles = html`
 }
 
 .comparison-slider .comparison-label {
-  background: rgba(48, 55, 66, .5);
+  background: rgba(128, 0, 51, .5);
   bottom: .8rem;
   color: #fff;
   padding: .2rem .4rem;
@@ -585,7 +585,7 @@ const styles = html`
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background: #f7f8f9;
+  background: white;
   border: 0;
   border-radius: .1rem;
   display: block;
@@ -605,7 +605,7 @@ const styles = html`
 }
 
 .meter::-webkit-meter-bar {
-  background: #f7f8f9;
+  background: white;
 }
 
 .meter::-webkit-meter-optimum-value {
@@ -659,7 +659,7 @@ const styles = html`
 }
 
 .off-canvas .off-canvas-sidebar {
-  background: #f7f8f9;
+  background: white;
   bottom: 0;
   left: 0;
   min-width: 10rem;
@@ -679,7 +679,7 @@ const styles = html`
 }
 
 .off-canvas .off-canvas-overlay {
-  background: rgba(48, 55, 66, .1);
+  background: rgba(128, 0, 51, .1);
   border-color: transparent;
   border-radius: 0;
   bottom: 0;
@@ -726,7 +726,7 @@ const styles = html`
 }
 
 .parallax .parallax-content {
-  box-shadow: 0 1rem 2.1rem rgba(48, 55, 66, .3);
+  box-shadow: 0 1rem 2.1rem rgba(128, 0, 51, .3);
   height: auto;
   transform: perspective(1000px);
   transform-style: preserve-3d;
@@ -756,7 +756,7 @@ const styles = html`
   left: 0;
   position: absolute;
   text-align: center;
-  text-shadow: 0 0 20px rgba(48, 55, 66, .75);
+  text-shadow: 0 0 20px rgba(128, 0, 51, .75);
   top: 0;
   transform: translateZ(50px) scale(.95);
   transition: transform .4s;
@@ -868,7 +868,7 @@ const styles = html`
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background: #eef0f3;
+  background: #f7f7f7;
   border: 0;
   border-radius: .1rem;
   color: #f06;
@@ -894,7 +894,7 @@ const styles = html`
 
 .progress:indeterminate {
   animation: progress-indeterminate 1.5s linear infinite;
-  background: #eef0f3 linear-gradient(to right, #f06 30%, #eef0f3 30%) top left/150% 150% no-repeat;
+  background: #f7f7f7 linear-gradient(to right, #f06 30%, #f7f7f7 30%) top left/150% 150% no-repeat;
 }
 
 .progress:indeterminate::-moz-progress-bar {
@@ -972,38 +972,38 @@ const styles = html`
 
 .slider:disabled::-webkit-slider-thumb,
 .slider.disabled::-webkit-slider-thumb {
-  background: #f7f8f9;
+  background: white;
   transform: scale(1);
 }
 
 .slider:disabled::-moz-range-thumb,
 .slider.disabled::-moz-range-thumb {
-  background: #f7f8f9;
+  background: white;
   transform: scale(1);
 }
 
 .slider:disabled::-ms-thumb,
 .slider.disabled::-ms-thumb {
-  background: #f7f8f9;
+  background: white;
   transform: scale(1);
 }
 
 .slider::-webkit-slider-runnable-track {
-  background: #eef0f3;
+  background: #f7f7f7;
   border-radius: .1rem;
   height: .1rem;
   width: 100%;
 }
 
 .slider::-moz-range-track {
-  background: #eef0f3;
+  background: #f7f7f7;
   border-radius: .1rem;
   height: .1rem;
   width: 100%;
 }
 
 .slider::-ms-track {
-  background: #eef0f3;
+  background: #f7f7f7;
   border-radius: .1rem;
   height: .1rem;
   width: 100%;
@@ -1021,7 +1021,7 @@ const styles = html`
 }
 
 .timeline .timeline-item::before {
-  background: #dadee4;
+  background: #ffcde1;
   content: "";
   height: 100%;
   left: 11px;
