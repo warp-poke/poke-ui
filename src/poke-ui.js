@@ -82,7 +82,7 @@ class PokeUi extends PolymerElement {
 
       </style>
 
-      <app-location route="{{route}}" url-space-regex="^[[rootPath]]">
+      <app-location route="{{route}}" url-space-regex="^[[rootPath]]" use-hash-as-path>
       </app-location>
 
       <app-route route="{{route}}" pattern="[[rootPath]]:page" data="{{routeData}}" tail="{{subroute}}">
@@ -95,10 +95,8 @@ class PokeUi extends PolymerElement {
             <poke-logo></poke-logo>
           </app-toolbar>
           <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-            <a name="view1" href="[[rootPath]]view1">View One</a>
-            <a name="view2" href="[[rootPath]]view2">View Two</a>
-            <a name="view3" href="[[rootPath]]view3">View Three</a>
-            <a name="auth" href="[[rootPath]]auth">Sign in / sign up</a>
+            <a name="uptime" href="/uptime">Uptime</a>
+            <a name="auth" href="/auth">Sign in / sign up</a>
           </iron-selector>
         </app-drawer>
 
@@ -115,11 +113,17 @@ class PokeUi extends PolymerElement {
           </app-header>
 
           <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
-            <my-view1 name="view1" conf="[[conf]]"></my-view1>
-            <my-view2 name="view2" conf="[[conf]]"></my-view2>
-            <my-view3 name="view3" conf="[[conf]]"></my-view3>
-            <poke-auth name="auth" conf="[[conf]]"></poke-auth>
-            <my-view404 name="view404" conf="[[conf]]"></my-view404>
+            <poke-uptime 
+                name="uptime"
+                active="[[page]]"
+                conf="[[conf]]"
+                on-token-not-found="onTokenNotFound"></poke-uptime>
+            <poke-auth 
+                name="auth" 
+                active="[[page]]"
+                conf="[[conf]]"
+                on-signin-succesful="onSigninSuccesful"></poke-auth>
+            <poke-view404 name="view404" conf="[[conf]]"></poke-view404>
           </iron-pages>
         </app-header-layout>
       </app-drawer-layout>
@@ -151,10 +155,10 @@ class PokeUi extends PolymerElement {
      // Show the corresponding page according to the route.
      //
      // If no page was found in the route data, page will be an empty string.
-     // Show 'view1' in that case. And if the page doesn't exist, show 'view404'.
+     // Show 'uptime' in that case. And if the page doesn't exist, show 'view404'.
     if (!page) {
-      this.page = 'view1';
-    } else if (['view1', 'view2', 'view3', 'auth'].indexOf(page) !== -1) {
+      this.page = 'uptime';
+    } else if (['uptime', 'auth'].indexOf(page) !== -1) {
       this.page = page;
     } else {
       this.page = 'view404';
@@ -172,20 +176,14 @@ class PokeUi extends PolymerElement {
     // Note: `polymer build` doesn't like string concatenation in the import
     // statement, so break it up.
     switch (page) {
-      case 'view1':
-        import('./my-view1.js');
-        break;
-      case 'view2':
-        import('./my-view2.js');
-        break;
-      case 'view3':
-        import('./my-view3.js');
+      case 'uptime':
+        import('./poke-uptime.js');
         break;
       case 'auth':
           import('./poke-auth.js');
           break;
       case 'view404':
-        import('./my-view404.js');
+        import('./poke-view404.js');
         break;
     }
   }
@@ -197,8 +195,8 @@ class PokeUi extends PolymerElement {
 
   async fetchConf() {
     this.conf = {
-      "warpEndpoint":"http://127.0.0.1:8080/api/v0/exec",
-      "pokeApiEndpoint":"https://warp-poke-scheduler.cleverapps.io",
+      'warpEndpoint': 'https://gra1-poke.metrics.ovh.net/api/v0',
+      'pokeApiEndpoint': 'https://warp-poke-scheduler.cleverapps.io',
     }
     try {
       let response = await fetch('/etc/conf.json');
@@ -207,6 +205,16 @@ class PokeUi extends PolymerElement {
     } catch(err) {
       console.error('[poke-ui] error while retrieving conf, using default:', this.conf);
     }
+  }
+
+  onSigninSuccesful() {
+    console.log('[poke-ui] onSigninSuccesful');
+    location.hash = `/uptime`;
+  }
+
+  onTokenNotFound() {
+    console.log('[poke-ui] onTokenNotFound');
+    location.hash = '/auth';
   }
 }
 

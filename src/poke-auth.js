@@ -1,12 +1,14 @@
 import { LitElement, html } from '@polymer/lit-element';
 import spectreCSS from './css/granite-lit-spectre-min';
 
-console.log(spectreCSS)
 class PokeAuth extends LitElement {
 
   constructor() {
     super();
+    this.name = 'auth';
     this.message = '';
+
+    this.active = '';
     
     this.loading = false;
     this.signupDisabled = true;
@@ -28,13 +30,17 @@ class PokeAuth extends LitElement {
    *  pokeApiEndpoint: { type: String },
    */
 
-  static set conf(conf) {
+  set conf(conf) {
+    console.log('[poke-uptime] conf', conf);
     this.pokeApiEndpoint = (conf && conf.pokeApiEndpoint) 
-        ? this.conf.pokeApiEndpoint : 'https://warp-poke-scheduler.cleverapps.io';
+        ? conf.pokeApiEndpoint : 'https://warp-poke-scheduler.cleverapps.io';
   }
 
   static get properties() {
     return {
+      active: { type: String },
+      name: { type: String },
+      conf: {type: Object},
       message: { type: String },      
       loading: { type: Boolean },    
       signinDisabled: { type: Boolean },
@@ -101,12 +107,13 @@ class PokeAuth extends LitElement {
       if (!data.token) {
         throw new Error('No token found in response');
       }
+      window.localStorage.setItem('authToken', data.token);
+      console.log("[poke-auth] Signing-in succesful, authToken", data.token);
+      this.dispatchEvent(new CustomEvent('signin-succesful'));
 
-      console.log("[poke-auth] Signing-in succesful, authToken", authToken);
-      window.localStorage.setItem('authToken', authToken);
-      window.dispatchEvent(new Event('sign-in-succesful'));
     } catch(error) {
-      console.error('[poke-sign-in] Signing-in error - There has been a problem with your fetch operation:',
+      console.error(
+          '[poke-sign-in] Signing-in error - There has been a problem with your fetch operation:',
           error.message);
       this.message = error.message;   
     }
@@ -138,7 +145,6 @@ class PokeAuth extends LitElement {
 
   checkSigninDisabled() {
     if (this.signinEmail.length > 0 && this.signinPassword.length > 0) {
-      console.log("[poke-auth] checkSigninDisabled", this.signinEmail, this.signinPassword);
       this.signinDisabled = false;
       return;
     }
@@ -146,7 +152,6 @@ class PokeAuth extends LitElement {
   }
   checkSignupDisabled() {
     if (this.signupEmail.length > 0 && this.signupPassword.length > 0) {
-      console.log("[poke-auth] checkSignupDisabled", this.signupEmail, this.signupPassword);
       this.signupDisabled = false;
       return;
     }
@@ -154,7 +159,9 @@ class PokeAuth extends LitElement {
   }
 
   render() {
-    console.log('[poke-auth] rendering', this.signinDisabled)
+    if (this.active != this.name) {
+      return '';
+    }
     return html`
       ${spectreCSS}
       <style>
