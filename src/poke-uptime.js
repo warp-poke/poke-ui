@@ -205,8 +205,7 @@ class PokeUptime extends LitElement {
             <poke-uptime-service 
               .service='${service}' 
               warp10Token='${this.warp10Token}' 
-              warpEndpoint='${this.warpEndpoint}'
-              debug></poke-uptime-service>
+              warpEndpoint='${this.warpEndpoint}'></poke-uptime-service>
           `
         : ''
       )}

@@ -12,7 +12,7 @@ class PokeLogo extends LitElement {
       .poke-logo {
         fill: #fff;
         width: 12rem;
-        height: 3.5rem;
+        height: 5rem;
       }
     </style>
     <svg xmlns="http://www.w3.org/2000/svg" class="poke-logo" width="96" height="24" viewBox="0 0 25.4 6.35">
