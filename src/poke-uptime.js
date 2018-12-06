@@ -39,17 +39,22 @@ class PokeUptime extends LitElement {
     if (!this.warpEndpoint || !this.pokeApiEndpoint) {
       this.conf = {};
     }
+  }  
+
+
+  shouldUpdate() {
+    console.log('[poke-uptime] shouldUpdate ');
+
+    if (!this.verifyAuth()) {
+      return false;
+    }
     if (!this.warp10Token) {
       this.loadWarp10Token();
     }
     if (!this.services) {
       this.loadServices();
     }
-  }  
-
-
-  shouldUpdate() {
-    return this.verifyAuth();
+    return true;
   }
 
   verifyAuth() {

@@ -115,13 +115,13 @@ class PokeUi extends PolymerElement {
           <iron-pages selected="[[page]]" attr-for-selected="name" role="main">
             <poke-uptime 
                 name="uptime"
-                active="[[page]]"
+                active$="[[page]]"
                 conf="[[conf]]"
                 filter="[[subrouteItem]]"
                 on-token-not-found="onTokenNotFound"></poke-uptime>
             <poke-auth 
                 name="auth" 
-                active="[[page]]"
+                active$="[[page]]"
                 conf="[[conf]]"
                 on-signin-succesful="onSigninSuccesful"></poke-auth>
             <poke-view404 name="view404" conf="[[conf]]"></poke-view404>
